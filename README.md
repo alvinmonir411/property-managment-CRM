@@ -14,6 +14,10 @@ pnpm dev
 bun dev
 ```
 
+NEXTAUTH_SECRET="N6iwD0YMuJ08uL1xKmj4UMvx/zhkQyc1XE7OpoT9Dqk="
+MONGODB_URI="mongodb+srv://alvinmonir411_db_user:v2ThCKpLS31K1qw7@cluster0.gheaviv.mongodb.net/?appName=Cluster0"
+NEXT_PUBLIC_API_URL='http://localhost:3000'
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
