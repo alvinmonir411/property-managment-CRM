@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface Lead {
   _id: string;
@@ -343,12 +344,13 @@ export const LeadsListView = () => {
                 </button>
                 {isAdmin && (
                   <>
-                    <button
+                    <Link
+                      href={`/dashboard/admin/leads/edit/${lead._id}`}
                       className="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all border border-emerald-200"
                       title="Edit Lead"
                     >
                       <Edit className="w-4 h-4" />
-                    </button>
+                    </Link>
                     <button
                       onClick={() => handleDelete(lead._id)}
                       disabled={isDeleting}

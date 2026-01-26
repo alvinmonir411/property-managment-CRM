@@ -3,6 +3,66 @@ import clientPromise from "@/app/lib/mongodbClient";
 import { auth } from "@/app/auth";
 import { ObjectId } from "mongodb";
 
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
+  try {
+    // 1. Session check
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    // 2. Admin-only check
+    const userRole = (session.user as any)?.role;
+    if (userRole !== "admin") {
+      return NextResponse.json(
+        { message: "Forbidden: Admin access required" },
+        { status: 403 },
+      );
+    }
+
+    // 3. Database Connection
+    const client = await clientPromise;
+    const db = client.db("monir");
+
+    // 4. Params theke ID neya (Next.js 15 update hole await params lagte pare)
+    const { id } = await params;
+    console.log(id);
+
+    // 5. Find lead by ID
+    const lead = await db.collection("leads").findOne({
+      _id: new ObjectId(id),
+    });
+
+    // 6. Response check
+    if (!lead) {
+      return NextResponse.json(
+        { success: false, message: "Lead not found" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        lead: lead,
+      },
+      { status: 200 },
+    );
+  } catch (error: any) {
+    console.error("API Error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      },
+      { status: 500 },
+    );
+  }
+}
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } },
