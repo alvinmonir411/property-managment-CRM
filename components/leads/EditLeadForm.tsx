@@ -43,7 +43,7 @@ export default function EditLeadForm({ id }: { id: string }) {
     const { name, value } = e.target;
     setLead((prev: any) => ({ ...prev, [name]: value }));
   };
-
+  console.log("btn clicked");
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setSaving(true);

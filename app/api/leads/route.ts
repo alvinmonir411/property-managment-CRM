@@ -85,8 +85,14 @@ export async function GET(req: Request) {
     let query = {};
 
     if (userRole !== "admin") {
-      query = { leadsAddby: userEmail };
+      query = {
+        $or: [
+          { leadsAddby: userEmail },
+          { assignedAgent: userEmail },
+        ],
+      };
     }
+
     const leads = await db
       .collection("leads")
       .find(query)
@@ -98,7 +104,7 @@ export async function GET(req: Request) {
         success: true,
         leads,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error: any) {
     console.error("API Error:", error);
@@ -107,7 +113,7 @@ export async function GET(req: Request) {
         message: "Internal server error",
         error: error.message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

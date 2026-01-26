@@ -138,7 +138,7 @@ export const LeadsListView = () => {
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      New: "bg-blue-50 text-blue-700 border-blue-200",
+      New: "bg-purple-50 text-purple-700 border-purple-200",
       Contacted: "bg-yellow-50 text-yellow-700 border-yellow-200",
       Qualified: "bg-green-50 text-green-700 border-green-200",
       Closed: "bg-purple-50 text-purple-700 border-purple-200",
@@ -151,7 +151,7 @@ export const LeadsListView = () => {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+          <Loader2 className="w-10 h-10 animate-spin text-purple-600" />
           <p className="text-slate-500 text-sm">Loading your leads...</p>
         </div>
       </div>
@@ -161,9 +161,9 @@ export const LeadsListView = () => {
   return (
     <div className="space-y-8">
       {/* Premium Header with Stats */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-3xl p-8 shadow-2xl shadow-blue-500/20">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+      <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 rounded-3xl p-8 shadow-2xl shadow-purple-500/20">
+        <div className="absolute top-0 right-0 w-ful h-64 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-7xl h-96 bg-white/5 rounded-full blur-3xl"></div>
 
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
@@ -171,7 +171,7 @@ export const LeadsListView = () => {
               <h2 className="text-3xl font-bold text-white mb-2">
                 Leads Management
               </h2>
-              <p className="text-blue-100">
+              <p className="text-purple-100">
                 Track and manage your property leads efficiently
               </p>
             </div>
@@ -180,21 +180,21 @@ export const LeadsListView = () => {
                 <p className="text-4xl font-bold text-white">
                   {filteredLeads.length}
                 </p>
-                <p className="text-blue-100 text-sm">Total Leads</p>
+                <p className="text-purple-100 text-sm">Total Leads</p>
               </div>
               <div className="w-px h-12 bg-white/20"></div>
               <div className="text-center">
                 <p className="text-4xl font-bold text-white">
                   {filteredLeads.filter((l) => l.status === "New").length}
                 </p>
-                <p className="text-blue-100 text-sm">New</p>
+                <p className="text-purple-100 text-sm">New</p>
               </div>
               <div className="w-px h-12 bg-white/20"></div>
               <div className="text-center">
                 <p className="text-4xl font-bold text-white">
                   {filteredLeads.filter((l) => l.score >= 70).length}
                 </p>
-                <p className="text-blue-100 text-sm">Hot Leads</p>
+                <p className="text-purple-100 text-sm">Hot Leads</p>
               </div>
             </div>
           </div>
@@ -202,7 +202,7 @@ export const LeadsListView = () => {
           {/* Search & Filters */}
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative group">
-              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-600 transition-colors" />
               <input
                 type="text"
                 placeholder="Search by name, email, phone, location..."
@@ -251,12 +251,12 @@ export const LeadsListView = () => {
           {filteredLeads.map((lead) => (
             <div
               key={lead._id}
-              className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-1"
+              className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl hover:border-purple-200 transition-all duration-300 hover:-translate-y-1"
             >
               {/* Card Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="font-bold text-slate-800 text-lg mb-1 group-hover:text-blue-600 transition-colors">
+                  <h3 className="font-bold text-slate-800 text-lg mb-1 group-hover:text-purple-600 transition-colors">
                     {lead.fullName}
                   </h3>
                   <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
@@ -277,7 +277,7 @@ export const LeadsListView = () => {
                   >
                     {lead.status}
                   </span>
-                  <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-1.5 rounded-full">
+                  <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-50 to-indigo-50 px-3 py-1.5 rounded-full">
                     <TrendingUp
                       className={cn(
                         "w-3.5 h-3.5",
@@ -298,8 +298,8 @@ export const LeadsListView = () => {
               {/* Property Info */}
               <div className="space-y-3 mb-4 pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-purple-600" />
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-slate-500">Property Type</p>
@@ -337,7 +337,7 @@ export const LeadsListView = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSelectedLead(lead)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30"
                 >
                   <Eye className="w-4 h-4" />
                   <span>View Details</span>
@@ -374,10 +374,10 @@ export const LeadsListView = () => {
           onClick={() => setSelectedLead(null)}
         >
           <div
-            className="bg-white rounded-2xl md:rounded-3xl shadow-2xl max-w-3xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-2xl md:rounded-3xl shadow-2xl max-w-7xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 px-4 md:px-8 py-4 md:py-6 flex items-center justify-between rounded-t-2xl md:rounded-t-3xl">
+            <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-purple-700 px-4 md:px-8 py-4 md:py-6 flex items-center justify-between rounded-t-2xl md:rounded-t-3xl">
               <h3 className="text-xl md:text-2xl font-bold text-white">
                 Lead Details
               </h3>
@@ -393,8 +393,8 @@ export const LeadsListView = () => {
               {/* Contact Info */}
               <div>
                 <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-lg">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <User className="w-4 h-4 text-blue-600" />
+                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <User className="w-4 h-4 text-purple-600" />
                   </div>
                   Contact Information
                 </h4>

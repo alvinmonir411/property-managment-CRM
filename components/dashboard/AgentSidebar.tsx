@@ -14,7 +14,8 @@ import {
     ChevronLeft,
     ChevronRight,
     LogOut,
-    Building2
+    Building2,
+    BookHeart
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -30,6 +31,11 @@ const navlinks = [
         label: "My Leads",
         href: "/dashboard/agents/leads",
         icon: Users
+    },
+    {
+        label: "Assigned Leads",
+        href: "/dashboard/agents/assignedleads",
+        icon: BookHeart,
     },
     {
         label: "Add Lead",

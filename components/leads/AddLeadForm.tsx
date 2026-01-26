@@ -92,7 +92,7 @@ export const AddLeadForm = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto pb-20">
+        <div className="max-w-7xl mx-auto pb-20">
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-slate-800">Add New Lead</h2>
                 <p className="text-slate-500">Enter client information to initialize the lead management process.</p>
@@ -102,7 +102,7 @@ export const AddLeadForm = () => {
                 {/* A. Required Client Fields */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                     <div className="flex items-center gap-2 mb-6 pb-2 border-b border-slate-50">
-                        <User className="w-5 h-5 text-blue-600" />
+                        <User className="w-5 h-5 text-purple-600" />
                         <h3 className="font-semibold text-slate-800">Required Client Fields</h3>
                     </div>
 
@@ -118,7 +118,7 @@ export const AddLeadForm = () => {
                                     value={formData.fullName}
                                     onChange={handleChange}
                                     placeholder="e.g. John Doe"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                                 />
                             </div>
                         </div>
@@ -134,7 +134,7 @@ export const AddLeadForm = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="john@example.com"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                                 />
                             </div>
                         </div>
@@ -150,7 +150,7 @@ export const AddLeadForm = () => {
                                     value={formData.phone}
                                     onChange={handleChange}
                                     placeholder="+1 234 567 890"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                                 />
                             </div>
                         </div>
@@ -164,7 +164,7 @@ export const AddLeadForm = () => {
                                     name="propertyType"
                                     value={formData.propertyType}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 appearance-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 appearance-none transition-all"
                                 >
                                     <option>Apartment</option>
                                     <option>House</option>
@@ -186,7 +186,7 @@ export const AddLeadForm = () => {
                                         value={formData.budgetMin}
                                         onChange={handleChange}
                                         placeholder="Min"
-                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                                     />
                                 </div>
                                 <div className="relative flex-1">
@@ -198,7 +198,7 @@ export const AddLeadForm = () => {
                                         value={formData.budgetMax}
                                         onChange={handleChange}
                                         placeholder="Max"
-                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                                     />
                                 </div>
                             </div>
@@ -215,7 +215,7 @@ export const AddLeadForm = () => {
                                     value={formData.location}
                                     onChange={handleChange}
                                     placeholder="e.g. Downtown, New York"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                                 />
                             </div>
                         </div>
@@ -229,7 +229,7 @@ export const AddLeadForm = () => {
                                     name="purpose"
                                     value={formData.purpose}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 appearance-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 appearance-none transition-all"
                                 >
                                     <option>Buy</option>
                                     <option>Rent</option>
@@ -247,7 +247,7 @@ export const AddLeadForm = () => {
                                     name="source"
                                     value={formData.source}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 appearance-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 appearance-none transition-all"
                                 >
                                     <option>Website</option>
                                     <option>Facebook</option>
@@ -276,7 +276,7 @@ export const AddLeadForm = () => {
                                     name="timeline"
                                     value={formData.timeline}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 appearance-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 appearance-none transition-all"
                                 >
                                     <option>ASAP</option>
                                     <option>1–3 months</option>
@@ -293,7 +293,7 @@ export const AddLeadForm = () => {
                                     name="financeType"
                                     value={formData.financeType}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 appearance-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 appearance-none transition-all"
                                 >
                                     <option>Cash</option>
                                     <option>Bank Loan</option>
@@ -311,7 +311,7 @@ export const AddLeadForm = () => {
                                     value={formData.propertySize}
                                     onChange={handleChange}
                                     placeholder="e.g. 1500 sq ft or 3BHK"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                                 />
                             </div>
                         </div>
@@ -324,7 +324,7 @@ export const AddLeadForm = () => {
                                     name="contactPref"
                                     value={formData.contactPref}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 appearance-none transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 appearance-none transition-all"
                                 >
                                     <option>Call</option>
                                     <option>WhatsApp</option>
@@ -342,7 +342,7 @@ export const AddLeadForm = () => {
                                     name="nextFollowUpDate"
                                     value={formData.nextFollowUpDate}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                                 />
                             </div>
                         </div>
@@ -355,7 +355,7 @@ export const AddLeadForm = () => {
                                 onChange={handleChange}
                                 placeholder="Additional details about client preferences..."
                                 rows={4}
-                                className="w-full px-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                className="w-full px-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                             />
                         </div>
                     </div>
@@ -371,7 +371,7 @@ export const AddLeadForm = () => {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="px-8 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
+                        className="px-8 py-2.5 bg-purple-600 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/25 hover:bg-purple-700 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
                     >
                         {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
                         Create Lead
