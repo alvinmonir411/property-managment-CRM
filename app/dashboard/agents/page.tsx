@@ -130,7 +130,7 @@ export default function AgentDashboardHome() {
     if (loading) return <div className="p-10 text-center animate-pulse text-slate-400">Loading Agent Dashboard...</div>;
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-8 pb-20">
+        <div className="p-6 max-w-8xl mx-auto space-y-8 pb-20">
 
             {/* Header with Quick Actions */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

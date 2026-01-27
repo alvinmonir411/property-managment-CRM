@@ -12,8 +12,19 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
+        const role = (session.user as any).role;
         const body = await req.json();
         const { leadId, action, note, metadata } = body;
+
+        // RBAC: Agency Assistant (role: user) cannot move leads beyond "Assigned" or close deals
+        if (role === "user") {
+            if (action === "Stage Change" || action === "Complete") {
+                const nextStage = metadata?.nextStage;
+                if (nextStage && nextStage !== "Assigned") {
+                    return NextResponse.json({ message: "Forbidden: Assistants cannot move leads beyond Assigned" }, { status: 403 });
+                }
+            }
+        }
         // metadata can contain: nextStage, followUpDate, propertyId, etc.
 
         if (!leadId || !action) {
@@ -180,6 +191,68 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error("Action API Error:", error);
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: Request) {
+    try {
+        const session = await auth();
+        if (!session) {
+            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        }
+
+        const url = new URL(req.url);
+        const leadId = url.searchParams.get("leadId");
+
+        if (!leadId) {
+            return NextResponse.json({ message: "Missing leadId" }, { status: 400 });
+        }
+
+        const client = await clientPromise;
+        const db = client.db("monir");
+        const leadObjectId = new ObjectId(leadId);
+
+        // Fetch lead to get history
+        const lead = await db.collection("leads").findOne({ _id: leadObjectId });
+        if (!lead || !lead.history || lead.history.length === 0) {
+            return NextResponse.json({ message: "No history to undo" }, { status: 404 });
+        }
+
+        const lastAction = lead.history[lead.history.length - 1];
+        const previousStatus = lead.history.length > 1
+            ? lead.history.slice(0, -1).reverse().find((h: any) => h.action === "Stage Change")?.metadata?.nextStage || "Assigned"
+            : "Assigned";
+
+        // Revert side effects if it was a Deal (harder to revert fully but let's try status)
+        const updates: any = {
+            updatedAt: new Date(),
+        };
+
+        if (lastAction.action === "Stage Change" || lastAction.action === "Complete") {
+            updates.status = previousStatus;
+            // If it was a Deal, we'd ideally revert commission but that's complex for a basic undo.
+            // For now, let's just revert the status.
+        }
+
+        await db.collection("leads").updateOne(
+            { _id: leadObjectId },
+            {
+                $set: updates,
+                $pop: { history: 1 }
+            }
+        );
+
+        // Also remove from lead_activities
+        await db.collection("lead_activities").deleteOne({
+            leadId: leadObjectId,
+            createdAt: lastAction.date
+        });
+
+        return NextResponse.json({ success: true, message: "Action undone" });
+
+    } catch (error: any) {
+        console.error("Undo API Error:", error);
         return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }

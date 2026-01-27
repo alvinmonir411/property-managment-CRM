@@ -56,6 +56,7 @@ export const LeadsListView = () => {
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [sortBy, setSortBy] = useState<"createdAt" | "score" | "budgetMax">(
     "createdAt",
   );
@@ -93,10 +94,11 @@ export const LeadsListView = () => {
   const filterAndSortLeads = () => {
     let filtered = leads.filter(
       (lead) =>
-        lead.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lead.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lead.phone.includes(searchQuery) ||
-        lead.location.toLowerCase().includes(searchQuery.toLowerCase()),
+        (lead.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          lead.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          lead.phone.includes(searchQuery) ||
+          lead.location.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        (statusFilter === "All" || lead.status === statusFilter)
     );
 
     filtered.sort((a, b) => {
@@ -231,6 +233,54 @@ export const LeadsListView = () => {
                 />
               </div>
               <div className="flex gap-3">
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="bulk-import"
+                    className="hidden"
+                    accept=".json"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = async (evt) => {
+                        try {
+                          const items = JSON.parse(evt.target?.result as string);
+                          const res = await fetch("/api/admin/bulk-import", {
+                            method: "POST",
+                            body: JSON.stringify({ type: 'leads', items })
+                          });
+                          const data = await res.json();
+                          if (data.success) {
+                            toast.success(data.message);
+                            window.location.reload();
+                          } else {
+                            toast.error(data.message);
+                          }
+                        } catch (err) {
+                          toast.error("Invalid JSON format");
+                        }
+                      };
+                      reader.readAsText(file);
+                    }}
+                  />
+                  <label
+                    htmlFor="bulk-import"
+                    className="px-5 py-3.5 bg-slate-900 text-white rounded-2xl text-sm font-bold shadow-lg cursor-pointer hover:bg-purple-600 transition-all flex items-center gap-2"
+                  >
+                    🚀 Bulk Import
+                  </label>
+                </div>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-5 py-3.5 bg-white/95 backdrop-blur-sm border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-white/50 shadow-lg cursor-pointer"
+                >
+                  <option value="All">All Statuses</option>
+                  {["Assigned", "Call", "Visit", "Deal", "Commission"].map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}

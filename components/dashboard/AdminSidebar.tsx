@@ -19,6 +19,7 @@ import {
   BarChart3,
   User,
   Briefcase,
+  Plus,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -59,6 +60,11 @@ const navlinks = [
     label: "Properties",
     href: "/dashboard/admin/properties",
     icon: Home,
+  },
+  {
+    label: "Add Property",
+    href: "/dashboard/agents/add-property", // Reusing the same form/page for now
+    icon: Plus,
   }
 ];
 

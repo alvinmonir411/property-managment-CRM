@@ -33,9 +33,24 @@ const navlinks = [
         icon: UserPlus
     },
     {
-        label: "Overview",
-        href: "/dashboard/user/overview",
-        icon: Settings
+        label: "Properties",
+        href: "/dashboard/user/properties",
+        icon: Building2
+    },
+    {
+        label: "Follow-Ups",
+        href: "/dashboard/user/follow-ups",
+        icon: Settings // Using Settings for now as a placeholder icon for tasks/checks if needed
+    },
+    {
+        label: "Calendar",
+        href: "/dashboard/user/calendar",
+        icon: LayoutDashboard // Placeholder
+    },
+    {
+        label: "Profile",
+        href: "/dashboard/user/profile",
+        icon: Users
     },
 ]
 

@@ -102,6 +102,44 @@ function PropertiesContent() {
                     <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-100 text-green-700 font-medium text-sm">
                         Available: {properties.filter(p => p.status === 'Available').length}
                     </div>
+                    <div className="relative">
+                        <input
+                            type="file"
+                            id="bulk-import-props"
+                            className="hidden"
+                            accept=".json"
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const reader = new FileReader();
+                                reader.onload = async (evt) => {
+                                    try {
+                                        const items = JSON.parse(evt.target?.result as string);
+                                        const res = await fetch("/api/admin/bulk-import", {
+                                            method: "POST",
+                                            body: JSON.stringify({ type: 'properties', items })
+                                        });
+                                        const data = await res.json();
+                                        if (data.success) {
+                                            alert(data.message);
+                                            window.location.reload();
+                                        } else {
+                                            alert(data.message);
+                                        }
+                                    } catch (err) {
+                                        alert("Invalid JSON format");
+                                    }
+                                };
+                                reader.readAsText(file);
+                            }}
+                        />
+                        <label
+                            htmlFor="bulk-import-props"
+                            className="bg-slate-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-600 transition flex items-center gap-2 shadow-sm cursor-pointer"
+                        >
+                            🚀 Bulk Import
+                        </label>
+                    </div>
                     <Link
                         href="/dashboard/agents/add-property"
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm hover:shadow ml-2"

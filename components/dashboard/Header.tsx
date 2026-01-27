@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 
 import { useSession } from 'next-auth/react'
+import { cn } from '@/lib/utils'
 
 export const Header = ({
     setIsMobileOpen
@@ -28,6 +29,43 @@ export const Header = ({
     const capitalizedPage = currentPage.charAt(0).toUpperCase() + currentPage.slice(1)
 
     const user = session?.user as any
+
+    const [notifications, setNotifications] = React.useState<any[]>([])
+    const [isNotifOpen, setIsNotifOpen] = React.useState(false)
+
+    React.useEffect(() => {
+        const fetchNotifs = async () => {
+            try {
+                const res = await fetch("/api/notifications")
+                const data = await res.json()
+                if (data.success) setNotifications(data.notifications)
+            } catch (err) {
+                console.error("Notif fetch error:", err)
+            }
+        }
+        fetchNotifs()
+        // Poll every 60s for new notifs
+        const interval = setInterval(fetchNotifs, 60000)
+        return () => clearInterval(interval)
+    }, [])
+
+    const unreadCount = notifications.filter(n => !n.isRead).length
+
+    const markAsRead = async (id?: string) => {
+        try {
+            await fetch("/api/notifications", {
+                method: "PATCH",
+                body: JSON.stringify({ notificationId: id, markAll: !id })
+            })
+            if (!id) {
+                setNotifications(notifications.map(n => ({ ...n, isRead: true })))
+            } else {
+                setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n))
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
     return (
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-4 md:px-8 flex items-center justify-between">
@@ -62,15 +100,73 @@ export const Header = ({
                 </div>
 
                 {/* Action Icons */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 relative">
                     <button className="p-2.5 text-slate-500 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all relative">
                         <Mail className="w-5 h-5" />
                         <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full border-2 border-white"></span>
                     </button>
-                    <button className="p-2.5 text-slate-500 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all relative">
-                        <Bell className="w-5 h-5" />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
+
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsNotifOpen(!isNotifOpen)}
+                            className="p-2.5 text-slate-500 hover:bg-slate-50 hover:text-purple-600 rounded-xl transition-all relative"
+                        >
+                            <Bell className="w-5 h-5" />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-2 right-2 w-4 h-4 bg-red-500 text-[8px] text-white flex items-center justify-center rounded-full border-2 border-white font-black animate-pulse">
+                                    {unreadCount}
+                                </span>
+                            )}
+                        </button>
+
+                        <AnimatePresence>
+                            {isNotifOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 py-4 z-50 overflow-hidden"
+                                >
+                                    <div className="px-5 pb-3 border-b flex justify-between items-center">
+                                        <h3 className="font-bold text-slate-800">Notifications</h3>
+                                        <button
+                                            onClick={() => markAsRead()}
+                                            className="text-[10px] uppercase font-black tracking-widest text-purple-600 hover:text-purple-800"
+                                        >
+                                            Clear All
+                                        </button>
+                                    </div>
+                                    <div className="max-h-80 overflow-y-auto">
+                                        {notifications.length === 0 ? (
+                                            <div className="py-10 text-center">
+                                                <Bell className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+                                                <p className="text-xs text-slate-400">All caught up!</p>
+                                            </div>
+                                        ) : (
+                                            notifications.map(n => (
+                                                <div
+                                                    key={n._id}
+                                                    onClick={() => markAsRead(n._id)}
+                                                    className={cn(
+                                                        "px-5 py-4 border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors relative",
+                                                        !n.isRead && "bg-purple-50/30"
+                                                    )}
+                                                >
+                                                    {!n.isRead && <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-600" />}
+                                                    <p className="text-xs font-bold text-slate-800 mb-1">{n.title || 'New Update'}</p>
+                                                    <p className="text-[10px] text-slate-500 leading-relaxed line-clamp-2">{n.message}</p>
+                                                    <p className="text-[8px] text-slate-400 mt-2 uppercase font-bold">{new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                    <div className="px-5 pt-3 text-center border-t">
+                                        <p className="text-[10px] text-slate-400 font-medium italic">Viewing last 20 activities</p>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
 
                 {/* User Profile */}

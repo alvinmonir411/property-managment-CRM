@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     const session = await auth();
 
-    if (!session || (session.user as any).role !== "admin") {
+    if (!session || !["admin", "user"].includes((session.user as any).role)) {
         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -24,7 +24,27 @@ export async function GET() {
         const leadsCount = await db.collection("leads").countDocuments();
         const propertiesCount = await db.collection("properties").countDocuments({ status: "Available" });
 
-        // 2. Top Performing Agents
+        // Extra SaaS Stats (Hot Leads & Today's Follow-ups)
+        const hotLeadsCount = await db.collection("leads").countDocuments({ score: { $gt: 50 } });
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const followUpsToday = await db.collection("leads").countDocuments({
+            nextFollowUpDate: {
+                $gte: today.toISOString().split('T')[0],
+                $lt: tomorrow.toISOString().split('T')[0]
+            }
+        });
+
+        const upcomingVisits = await db.collection("leads").countDocuments({
+            status: "Visit"
+        });
+
+        // 2. Top Performing Agents (Removed for Assistants if you want to restrict, but prompt says Assistant handles leads/properties)
+        // Let's keep it for now as a bird's eye view
         const topAgents = [...users]
             .sort((a, b) => (b.totalSalesValue || 0) - (a.totalSalesValue || 0))
             .slice(0, 5)
@@ -36,14 +56,14 @@ export async function GET() {
                 commission: u.commission || 0
             }));
 
-        // 3. Recent Major Activities (Deals closed)
+        // 3. Recent Major Activities
         const recentDeals = await db.collection("lead_activities")
             .find({ actionType: "Deal" })
             .sort({ createdAt: -1 })
             .limit(5)
             .toArray();
 
-        // 4. Lead Status Breakdown (for chart)
+        // 4. Lead Status Breakdown
         const allLeads = await db.collection("leads").find({}).toArray();
         const statusBreakdown = allLeads.reduce((acc: any, lead) => {
             const status = lead.status || "Assigned";
@@ -57,7 +77,10 @@ export async function GET() {
                 totalCommission,
                 agentCount,
                 leadsCount,
-                propertiesCount
+                propertiesCount,
+                hotLeadsCount,
+                followUpsToday,
+                upcomingVisits
             },
             topAgents,
             recentDeals,

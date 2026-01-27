@@ -55,6 +55,12 @@ const STATUS_COLORS = {
     "Commission": "bg-emerald-100 text-emerald-800 border-emerald-200",
 };
 
+const WHATSAPP_TEMPLATES = [
+    { label: "Intro 🚀", text: "Hi [NAME], I'm your agent. I've been assigned to assist you with your search in [LOCATION]. When are you free for a quick chat?" },
+    { label: "Showing 🏠", text: "Hi [NAME], I'd like to show you a property that matches your budget ([BUDGET]). Are you available this weekend?" },
+    { label: "Follow-up 👋", text: "Hi [NAME], just following up on our last conversation. Any updates on your decision?" },
+];
+
 export default function AssignedLeadsPage() {
     const { executeAction, isActing } = useLeadActions();
     const [leads, setLeads] = useState<Lead[]>([]);
@@ -155,6 +161,23 @@ export default function AssignedLeadsPage() {
         } catch (err: any) {
             console.error(err);
             toast.error("Failed to update lead");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleUndo = async () => {
+        if (!selectedLead) return;
+        if (!confirm("Are you sure you want to undo the last action? This will revert the last status change/log.")) return;
+
+        setUpdating(true);
+        try {
+            await axiosInstance.delete(`/api/actions?leadId=${selectedLead._id}`);
+            toast.success("Last action undone!");
+            await fetchLeads();
+            resetModal();
+        } catch (err) {
+            toast.error("Failed to undo action");
         } finally {
             setUpdating(false);
         }
@@ -371,11 +394,46 @@ export default function AssignedLeadsPage() {
                                 />
                             </div>
 
+                            {/* WhatsApp Quick Templates */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">WhatsApp Quick Templates</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {WHATSAPP_TEMPLATES.map((tpl) => (
+                                        <button
+                                            key={tpl.label}
+                                            onClick={() => {
+                                                const msg = tpl.text
+                                                    .replace("[NAME]", selectedLead.fullName)
+                                                    .replace("[LOCATION]", selectedLead.location)
+                                                    .replace("[BUDGET]", selectedLead.budgetMax);
+                                                window.open(`https://wa.me/${selectedLead.phone}?text=${encodeURIComponent(msg)}`, "_blank");
+                                                executeAction(selectedLead._id, "WhatsApp", { phone: selectedLead.phone, note: `Sent WhatsApp: ${tpl.label}` });
+                                            }}
+                                            className="px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs font-bold hover:bg-green-600 hover:text-white transition-all shadow-sm"
+                                        >
+                                            {tpl.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+
                             {/* Activity Timeline */}
                             <div className="bg-gray-50 border rounded-xl p-4">
-                                <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Clock className="w-4 h-4 text-blue-600" /> Activity History
-                                </h4>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-blue-600" /> Activity History
+                                    </h4>
+                                    {selectedLead.history && selectedLead.history.length > 0 && (
+                                        <button
+                                            onClick={handleUndo}
+                                            disabled={updating}
+                                            className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 disabled:opacity-50"
+                                        >
+                                            Undo Last
+                                        </button>
+                                    )}
+                                </div>
                                 <div className="space-y-4 max-h-60 overflow-y-auto custom-scrollbar pr-2">
                                     {selectedLead.history && selectedLead.history.length > 0 ? (
                                         [...selectedLead.history].reverse().map((item, idx) => {

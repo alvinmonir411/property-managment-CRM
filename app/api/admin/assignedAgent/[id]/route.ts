@@ -50,12 +50,23 @@ export async function PATCH(
       },
     );
 
-    // 5. Update Agent Stats (Increment Assigned Leads Count)
+    // 5. Update Agent Stats (Increment Assigned Leads Count) & Notify Agent
     if (result.modifiedCount > 0) {
       await db.collection("user").updateOne(
         { email: assignedAgent },
         { $inc: { assignedLeadsCount: 1 } }
       );
+
+      // Create Notification
+      const lead = await db.collection("leads").findOne({ _id: new ObjectId(leadId) });
+      await db.collection("notifications").insertOne({
+        userId: assignedAgent,
+        title: "New Lead Assigned! 🚀",
+        message: `You have been assigned a new lead: ${lead?.fullName || 'Untitled'}. Reach out now!`,
+        type: "LEAD_ASSIGNED",
+        isRead: false,
+        createdAt: new Date()
+      });
     }
 
     if (result.matchedCount === 0) {

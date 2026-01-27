@@ -12,7 +12,9 @@ import {
     Activity,
     Plus,
     Loader2,
-    Briefcase
+    Briefcase,
+    Clock,
+    Calendar
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { axiosInstance } from "@/app/lib/axios";
@@ -60,10 +62,10 @@ export default function AdminDashboardPage() {
     if (!data) return <div className="p-8 text-center text-red-500">Failed to load platform data. Please ensure you are logged in as an Admin.</div>;
 
     const kpiCards = [
-        { title: "Platform Revenue", value: `$${(data.stats.totalSales / 1000000).toFixed(2)}M`, icon: <TrendingUp />, color: "bg-purple-600", trend: "+12.5%" },
-        { title: "Total Commissions", value: `$${(data.stats.totalCommission / 1000).toFixed(1)}k`, icon: <DollarSign />, color: "bg-blue-600", trend: "+5.2%" },
-        { title: "Active Inventory", value: data.stats.propertiesCount.toString(), icon: <Home />, color: "bg-emerald-600", trend: "Stable" },
-        { title: "Total Leads", value: data.stats.leadsCount.toString(), icon: <Users />, color: "bg-amber-600", trend: "+24 today" },
+        { title: "Revenue", value: `$${(data.stats.totalSales / 1000).toFixed(1)}k`, icon: <TrendingUp />, color: "bg-purple-600", trend: "Agency Total" },
+        { title: "Hot Leads", value: (data.stats as any).hotLeadsCount?.toString() || "0", icon: <Activity />, color: "bg-red-600", trend: "Score > 50" },
+        { title: "Daily Follow-ups", value: (data.stats as any).followUpsToday?.toString() || "0", icon: <Clock />, color: "bg-amber-600", trend: "Due Today" },
+        { title: "Active Visits", value: (data.stats as any).upcomingVisits?.toString() || "0", icon: <Calendar />, color: "bg-emerald-600", trend: "Live pipeline" },
     ];
 
     return (
@@ -164,6 +166,35 @@ export default function AdminDashboardPage() {
                     </div>
 
                     <div className="space-y-6 flex-1">
+                        {/* Summary Visualization */}
+                        <div className="mb-8 p-6 bg-slate-900 rounded-[2rem] text-white shadow-xl shadow-purple-200/20 relative overflow-hidden group">
+                            <div className="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/10 rounded-full group-hover:scale-150 transition-transform duration-700" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-300 mb-2">Platform IQ</p>
+                            <h3 className="text-2xl font-black mb-4">Conversion Funnel</h3>
+                            <div className="space-y-3">
+                                {Object.entries(data.statusBreakdown).map(([status, count], i) => {
+                                    const total = data.stats.leadsCount || 1;
+                                    const width = Math.max(30, (count / total) * 100);
+                                    return (
+                                        <div key={status} className="flex flex-col gap-1">
+                                            <div className="flex justify-between items-center px-1">
+                                                <span className="text-[10px] font-bold text-slate-400 capitalize">{status}</span>
+                                                <span className="text-[10px] font-black">{count}</span>
+                                            </div>
+                                            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden backdrop-blur-md">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${width}%` }}
+                                                    transition={{ delay: i * 0.1 }}
+                                                    className={`h-full rounded-full ${i === 0 ? 'bg-purple-400' : 'bg-white/40'}`}
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+
                         {Object.entries(data.statusBreakdown).map(([status, count]) => {
                             const total = data.stats.leadsCount || 1;
                             const percentage = (count / total) * 100;

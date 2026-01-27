@@ -43,6 +43,7 @@ export default function AgentFollowUpPage() {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
     const { executeAction, isActing } = useLeadActions();
 
     // Modal State
@@ -79,7 +80,11 @@ export default function AgentFollowUpPage() {
         today.setHours(0, 0, 0, 0);
 
         return leads
-            .filter(l => l.nextFollowUpDate && !["Deal", "Commission", "Closed"].includes(l.status))
+            .filter(l =>
+                l.nextFollowUpDate &&
+                !["Deal", "Commission", "Closed"].includes(l.status) &&
+                (l.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || l.phone.includes(searchQuery))
+            )
             .map(l => {
                 const date = new Date(l.nextFollowUpDate!);
                 date.setHours(0, 0, 0, 0);
@@ -92,7 +97,7 @@ export default function AgentFollowUpPage() {
                 return { ...l, timeStatus, dateObj: date };
             })
             .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
-    }, [leads]);
+    }, [leads, searchQuery]);
 
     const stats = {
         today: processedLeads.filter(l => l.timeStatus === 'today').length,
@@ -125,6 +130,23 @@ export default function AgentFollowUpPage() {
         setNextStage("");
         setSelectedPropertyId("");
         setPropertySearch("");
+    };
+
+    const handleUndo = async () => {
+        if (!selectedLead) return;
+        if (!confirm("Are you sure you want to undo the last action?")) return;
+
+        setUpdating(true);
+        try {
+            await axiosInstance.delete(`/api/actions?leadId=${selectedLead._id}`);
+            toast.success("Last action undone!");
+            await fetchData();
+            closeCompleteModal();
+        } catch (err) {
+            toast.error("Failed to undo action");
+        } finally {
+            setUpdating(false);
+        }
     };
 
     const handleUpdateLead = async () => {
@@ -165,10 +187,22 @@ export default function AgentFollowUpPage() {
         <div className="min-h-screen bg-slate-50 pb-20">
             {/* Top Stats Bar */}
             <div className="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 shadow-sm">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Follow Ups</h1>
-                        <p className="text-slate-500 text-sm font-medium">Clear your daily tasks</p>
+                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+                    <div className="flex items-center gap-4 w-full lg:w-auto">
+                        <div>
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Follow Ups</h1>
+                            <p className="text-slate-500 text-sm font-medium">Clear your daily tasks</p>
+                        </div>
+                        <div className="relative flex-1 lg:w-64 max-w-xs">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Search by name..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
                     </div>
                     <div className="flex gap-4">
                         <Badge label="Overdue" count={stats.overdue} color="bg-red-50 text-red-600 border-red-200" />
@@ -199,7 +233,7 @@ export default function AgentFollowUpPage() {
                                     <div className="flex items-center gap-2 mb-1">
                                         <h3 className="font-bold text-lg text-slate-800">{lead.fullName}</h3>
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${lead.timeStatus === 'overdue' ? 'bg-red-100 text-red-600' :
-                                                lead.timeStatus === 'today' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
+                                            lead.timeStatus === 'today' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
                                             }`}>
                                             {lead.timeStatus}
                                         </span>
@@ -267,6 +301,40 @@ export default function AgentFollowUpPage() {
                                     className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none min-h-[100px] text-sm"
                                 />
                             </div>
+
+                            {/* Activity History */}
+                            <div className="bg-gray-50 border rounded-xl p-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-blue-600" /> Recent History
+                                    </h4>
+                                    {selectedLead.history && selectedLead.history.length > 0 && (
+                                        <button
+                                            onClick={handleUndo}
+                                            disabled={updating}
+                                            className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 disabled:opacity-50"
+                                        >
+                                            Undo Last
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="space-y-4 max-h-40 overflow-y-auto">
+                                    {selectedLead.history && selectedLead.history.length > 0 ? (
+                                        [...selectedLead.history].reverse().map((item, idx) => (
+                                            <div key={idx} className="pl-4 border-l-2 border-gray-200">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-xs font-bold">{item.action}</span>
+                                                    <span className="text-[10px] text-gray-400">{new Date(item.date).toLocaleDateString()}</span>
+                                                </div>
+                                                {item.note && <p className="text-[10px] text-gray-500">{item.note}</p>}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-xs text-gray-400 text-center">No history.</p>
+                                    )}
+                                </div>
+                            </div>
+
 
                             <div className="grid grid-cols-2 gap-4">
                                 {/* Follow Up Date */}
