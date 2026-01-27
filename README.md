@@ -1,79 +1,101 @@
-# Real Estate Agent Dashboard - Workflow & Features
+# 🏠 EliteProp SaaS - Real Estate CRM & Management Platform
 
-This Agent Dashboard is a complete, production-ready system for managing real estate operations. It includes Leads Management, Property Listings, Pipeline Tracking, and Activity Logging.
-
-## 🚀 Key Features
-
--   **Dashboard Home**: Real-time stats, quick actions, and recent activity overview.
--   **Leads Management**: Full CRUD (Create, Read, Update, Delete) with Search, Filtering, and Scoring.
--   **Property Listings**: Manage properties with status tracking (Available, Sold, Rent).
--   **Pipeline Board**: Kanban-style view to track deals from "New" to "Closed".
--   **Unified Actions**: Consistent "Call", "WhatsApp", "Note", and "Mark Done" actions across all pages.
--   **Calendar Integration**: View and manage follow-ups directly from a monthly calendar.
--   **RBAC**: Secure Agent/Admin role separation.
+EliteProp is a high-performance, production-grade SaaS solution designed for Real Estate Agencies. It streamlines the lifecycle of a lead from initial contact to successful deal closure, featuring automated scoring, property matching, and task management.
 
 ---
 
-## 📋 Agent Workflow
+## 🌟 Professional Features
 
-### 1. **Dashboard Overview**
-Start your day at `/dashboard/agents`.
--   **Check Stats**: See your active leads and listings at a glance.
--   **Quick Actions**: Use the "Add Lead" or "List Property" buttons for fast entry.
+### 🏢 Agency Administration
+- **Command Center**: Real-time KPI dashboard (Revenue, Hot Leads, Pipeline Health).
+- **Agent Leaderboard**: Track performance with sales and deal-count metrics.
+- **Bulk Import**: Rapidly populate the platform with thousands of Leads/Properties via JSON.
+- **Asset Inventory**: Centralized management of properties (Available/Sold/Rent).
 
-### 2. **Managing Leads**
-Navigate to `/dashboard/admin/leads` (or Agent Leads).
--   **Add Lead**: Click "Add Lead" to input new client details.
--   **Score**: Leads are automatically scored (0-100) based on budget, timeline, and completeness.
--   **Call/Action**: Click the **Phone** icon to call directly or add a **Quick Note**.
+### 🚀 Agent Productivity
+- **Smart Pipeline**: Kanban-style tracking of Stage moves (Assigned -> Call -> Visit -> Deal).
+- **Property Matching**: Automatic recommendation of properties based on lead budget and location.
+- **WhatsApp Automation**: Personalized quick-reply templates to close deals 10x faster.
+- **Interaction History**: Secure logging of every call, note, and stage change.
 
-### 3. **Pipeline Management**
-Go to `/dashboard/agents/pipeline`.
--   **Kanban View**: Visualize your sales funnel.
--   **Move Stages**: Drag or use the "Move" dropdown to progress leads (e.g., *Connected* -> *Visit*).
--   **Track Value**: See the total potential value of leads in each stage.
-
-### 4. **Daily Follow-ups**
-Check `/dashboard/agents/follow-ups`.
--   **Prioritize**: Tasks are sorted by *Overdue*, *Today*, and *Upcoming*.
--   **Complete Tasks**: Click **"Done"**. A modal will ask for the Outcome (Note) and Next Follow-up Date.
--   **Result**: The lead is updated, activity is logged, and the next task is scheduled effectively.
-
-### 5. **Property Management**
-Go to `/dashboard/agents/properties`.
--   **Listings**: View all your assigned properties.
--   **Add Property**: Use the comprehensive form to upload details and images.
--   **Status**: Toggle status between *Available*, *Sold*, etc.
-
-### 6. **Calendar**
-Visit `/dashboard/agents/calendar`.
--   **Schedule**: See your entire month's follow-ups.
--   **Interact**: Click a day to see tasks and perform actions directly from the drawer.
+### � Ecosystem Integration
+- **Notification Center**: Real-time alerts for new assignments and overdue tasks.
+- **Activity Undo**: Safety net to revert accidental stage moves or activity logs.
+- **Role-Based Access (RBAC)**: Distinct workflows for Admins, Agents, and Agency Assistants.
 
 ---
 
-## 🛠️ Technical Implementation
+## 🛠️ Technology Stack
 
-### Tech Stack
--   **Frontend**: Next.js 14+ (App Router), Tailwind CSS, Lucide React.
--   **Backend**: Next.js API Routes.
--   **Database**: MongoDB (Native Driver).
--   **Auth**: NextAuth.js (v5 Beta).
-
-### Key Components
--   `useLeadActions`: Custom hook for standardized action handling suitable for any component.
--   `LeadsListView`: Reusable list component with advanced filtering.
--   `AddPropertyForm`: Multi-step form for detailed property entry.
-
-### Database Schema (Simplified)
--   **Leads**: `_id`, `fullName`, `status`, `score`, `assignedAgent`, `nextFollowUpDate`.
--   **Properties**: `_id`, `title`, `price`, `status`, `agentEmail`, `images`.
--   **Activities**: `leadId`, `agentEmail`, `actionType` (Call, Note, etc.), `timestamp`.
+- **Framework**: [Next.js 14+](https://nextjs.org/) (App Router & Server Actions)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) (Fully Responsive, Premium Dark/Light Modes)
+- **Database**: [MongoDB](https://www.mongodb.com/) (Native Driver for maximum performance)
+- **Auth**: [NextAuth.js v5](https://authjs.dev/) (Enterprise-grade session management)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **State/API**: [Axios](https://axios-http.com/) with interceptors & React Hooks.
 
 ---
 
-## ✅ Deployment & Verification
+## 📋 Standard Workflows
 
-1.  **Install**: `npm install`
-2.  **Run**: `npm run dev`
-3.  **Verify**: Log in as an Agent and follow the workflow above.
+### 1. Lead Lifecycle
+1. **Intake**: Lead is created (Admin/Assistant) and assigned a **Score** based on budget/timeline.
+2. **Assignment**: Admin assigns lead to an Agent -> Agent receives a **Notification**.
+3. **Engagement**: Agent logs "Call" or "WhatsApp" -> Lead moves to **Call** stage.
+4. **Showing**: Agent matches property -> Schedules **Visit**.
+5. **Closing**: Negotiation leads to **Deal** -> Property marked **Sold** -> **Commission** logged.
+
+### 2. Bulk Management
+- **Format**: [
+    ```json
+    {
+      "fullName": "Jane Doe",
+      "email": "jane@example.com",
+      "phone": "+123456789",
+      "location": "Downtown",
+      "budgetMax": "500000"
+    }
+    ```
+  ]
+- **Action**: Use the "🚀 Bulk Import" button in Leads/Properties tabs.
+
+---
+
+## � Getting Started
+
+### Prerequisites
+- Node.js 18+
+- MongoDB Atlas connection string
+
+### Installation
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Configure environment variables in `.env.local`:
+   ```env
+   MONGODB_URI=your_mongodb_uri
+   AUTH_SECRET=your_nextauth_secret
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+### Deployment (Production)
+The platform is optimized for [Vercel](https://vercel.com/):
+- Connect your GitHub repo.
+- Add ENV variables in Vercel Dashboard.
+- Automatic CI/CD on every push.
+
+---
+
+## ✅ Quality Standards
+- **Responsive**: Mobile-first design for agents on the move.
+- **Secure**: RBAC enforced at both UI and API levels.
+- **Scalable**: Document-based architecture ready for high-volume data.
+
+---
+*Created with ❤️ for High-Performance Real Estate Teams.*
+

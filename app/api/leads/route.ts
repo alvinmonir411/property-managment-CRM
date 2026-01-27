@@ -12,6 +12,9 @@ export async function POST(req: Request) {
     }
 
     const data = await req.json();
+    if (!data.fullName || !data.phone) {
+      return NextResponse.json({ message: "Full Name and Phone are required" }, { status: 400 });
+    }
     const client = await clientPromise;
     const db = client.db("monir");
 
