@@ -63,6 +63,42 @@ export async function POST(req: Request) {
                 incUpdates.score += 5;
                 if (metadata.nextStage) {
                     updates.status = metadata.nextStage;
+                    // Handle transition to Deal
+                    if (metadata.nextStage === "Deal") {
+                        const lead = await db.collection("leads").findOne({ _id: leadObjectId });
+                        let propertyId = metadata.propertyId ? new ObjectId(metadata.propertyId) : (lead?.propertyId ? new ObjectId(lead.propertyId) : null);
+
+                        if (propertyId) {
+                            const property = await db.collection("properties").findOne({ _id: propertyId });
+                            if (property) {
+                                const price = parseFloat(property.price);
+                                const commission = price * 0.30;
+                                updates.dealPrice = price;
+                                updates.commission = commission;
+                                updates.propertyId = propertyId;
+
+                                // Mark Property as Sold
+                                await db.collection("properties").updateOne(
+                                    { _id: propertyId },
+                                    { $set: { status: "Sold" } }
+                                );
+
+                                // Update Agent Stats
+                                if (lead?.assignedAgent) {
+                                    await db.collection("user").updateOne(
+                                        { email: lead.assignedAgent },
+                                        {
+                                            $inc: {
+                                                commission: commission,
+                                                dealsClosed: 1,
+                                                totalSalesValue: price
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+                        }
+                    }
                 }
                 break;
 
@@ -78,6 +114,30 @@ export async function POST(req: Request) {
                 incUpdates.score += 5;
                 if (metadata.nextStage) {
                     updates.status = metadata.nextStage;
+                    // Handle transition to Deal (same as Stage Change)
+                    if (metadata.nextStage === "Deal") {
+                        const lead = await db.collection("leads").findOne({ _id: leadObjectId });
+                        let propertyId = metadata.propertyId ? new ObjectId(metadata.propertyId) : (lead?.propertyId ? new ObjectId(lead.propertyId) : null);
+
+                        if (propertyId) {
+                            const property = await db.collection("properties").findOne({ _id: propertyId });
+                            if (property) {
+                                const price = parseFloat(property.price);
+                                const commission = price * 0.30;
+                                updates.dealPrice = price;
+                                updates.commission = commission;
+                                updates.propertyId = propertyId;
+
+                                await db.collection("properties").updateOne({ _id: propertyId }, { $set: { status: "Sold" } });
+                                if (lead?.assignedAgent) {
+                                    await db.collection("user").updateOne(
+                                        { email: lead.assignedAgent },
+                                        { $inc: { commission: commission, dealsClosed: 1, totalSalesValue: price } }
+                                    );
+                                }
+                            }
+                        }
+                    }
                 }
                 if (metadata.followUpDate) {
                     updates.nextFollowUpDate = metadata.followUpDate;
@@ -92,7 +152,21 @@ export async function POST(req: Request) {
         }
 
         // 3. Execute Updates
-        const updateOp: any = { $set: updates };
+        // 3. Execute Updates
+        const historyEntry = {
+            id: new ObjectId(),
+            date: new Date(),
+            action: action,
+            note: note || "",
+            agentName: session.user?.name || "Agent",
+            ...(metadata.followUpDate ? { followUpDate: metadata.followUpDate } : {})
+        };
+
+        const updateOp: any = {
+            $set: updates,
+            $push: { history: historyEntry }
+        };
+
         if (incUpdates.score > 0 || incUpdates.followUpCount > 0) {
             updateOp.$inc = incUpdates;
         }

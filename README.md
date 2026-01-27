@@ -1,40 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Real Estate Agent Dashboard - Workflow & Features
 
-## Getting Started
+This Agent Dashboard is a complete, production-ready system for managing real estate operations. It includes Leads Management, Property Listings, Pipeline Tracking, and Activity Logging.
 
-First, run the development server:
+## 🚀 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+-   **Dashboard Home**: Real-time stats, quick actions, and recent activity overview.
+-   **Leads Management**: Full CRUD (Create, Read, Update, Delete) with Search, Filtering, and Scoring.
+-   **Property Listings**: Manage properties with status tracking (Available, Sold, Rent).
+-   **Pipeline Board**: Kanban-style view to track deals from "New" to "Closed".
+-   **Unified Actions**: Consistent "Call", "WhatsApp", "Note", and "Mark Done" actions across all pages.
+-   **Calendar Integration**: View and manage follow-ups directly from a monthly calendar.
+-   **RBAC**: Secure Agent/Admin role separation.
 
-NEXTAUTH_SECRET="N6iwD0YMuJ08uL1xKmj4UMvx/zhkQyc1XE7OpoT9Dqk="
-MONGODB_URI="mongodb+srv://alvinmonir411_db_user:v2ThCKpLS31K1qw7@cluster0.gheaviv.mongodb.net/?appName=Cluster0"
-NEXT_PUBLIC_API_URL='http://localhost:3000'
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📋 Agent Workflow
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. **Dashboard Overview**
+Start your day at `/dashboard/agents`.
+-   **Check Stats**: See your active leads and listings at a glance.
+-   **Quick Actions**: Use the "Add Lead" or "List Property" buttons for fast entry.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. **Managing Leads**
+Navigate to `/dashboard/admin/leads` (or Agent Leads).
+-   **Add Lead**: Click "Add Lead" to input new client details.
+-   **Score**: Leads are automatically scored (0-100) based on budget, timeline, and completeness.
+-   **Call/Action**: Click the **Phone** icon to call directly or add a **Quick Note**.
 
-## Learn More
+### 3. **Pipeline Management**
+Go to `/dashboard/agents/pipeline`.
+-   **Kanban View**: Visualize your sales funnel.
+-   **Move Stages**: Drag or use the "Move" dropdown to progress leads (e.g., *Connected* -> *Visit*).
+-   **Track Value**: See the total potential value of leads in each stage.
 
-To learn more about Next.js, take a look at the following resources:
+### 4. **Daily Follow-ups**
+Check `/dashboard/agents/follow-ups`.
+-   **Prioritize**: Tasks are sorted by *Overdue*, *Today*, and *Upcoming*.
+-   **Complete Tasks**: Click **"Done"**. A modal will ask for the Outcome (Note) and Next Follow-up Date.
+-   **Result**: The lead is updated, activity is logged, and the next task is scheduled effectively.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 5. **Property Management**
+Go to `/dashboard/agents/properties`.
+-   **Listings**: View all your assigned properties.
+-   **Add Property**: Use the comprehensive form to upload details and images.
+-   **Status**: Toggle status between *Available*, *Sold*, etc.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 6. **Calendar**
+Visit `/dashboard/agents/calendar`.
+-   **Schedule**: See your entire month's follow-ups.
+-   **Interact**: Click a day to see tasks and perform actions directly from the drawer.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🛠️ Technical Implementation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Tech Stack
+-   **Frontend**: Next.js 14+ (App Router), Tailwind CSS, Lucide React.
+-   **Backend**: Next.js API Routes.
+-   **Database**: MongoDB (Native Driver).
+-   **Auth**: NextAuth.js (v5 Beta).
+
+### Key Components
+-   `useLeadActions`: Custom hook for standardized action handling suitable for any component.
+-   `LeadsListView`: Reusable list component with advanced filtering.
+-   `AddPropertyForm`: Multi-step form for detailed property entry.
+
+### Database Schema (Simplified)
+-   **Leads**: `_id`, `fullName`, `status`, `score`, `assignedAgent`, `nextFollowUpDate`.
+-   **Properties**: `_id`, `title`, `price`, `status`, `agentEmail`, `images`.
+-   **Activities**: `leadId`, `agentEmail`, `actionType` (Call, Note, etc.), `timestamp`.
+
+---
+
+## ✅ Deployment & Verification
+
+1.  **Install**: `npm install`
+2.  **Run**: `npm run dev`
+3.  **Verify**: Log in as an Agent and follow the workflow above.

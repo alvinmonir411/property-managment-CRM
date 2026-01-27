@@ -9,8 +9,11 @@ export async function POST(req: Request) {
     try {
         const session = await auth();
 
-        if (!session || (session.user as any).role !== "agent") {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        if (!session) {
+            return NextResponse.json({ message: "Unauthorized: No session found" }, { status: 401 });
+        }
+        if (!["agent", "admin"].includes((session.user as any).role)) {
+            return NextResponse.json({ message: `Unauthorized: Role is ${(session.user as any).role}, expected agent or admin` }, { status: 401 });
         }
 
         const data = await req.json();
@@ -48,8 +51,11 @@ export async function POST(req: Request) {
 export async function GET() {
     try {
         const session = await auth();
-        if (!session || (session.user as any).role !== "agent") {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        if (!session) {
+            return NextResponse.json({ message: "Unauthorized: No session found" }, { status: 401 });
+        }
+        if (!["agent", "admin"].includes((session.user as any).role)) {
+            return NextResponse.json({ message: `Unauthorized: Role is ${(session.user as any).role}, expected agent or admin` }, { status: 401 });
         }
 
         const client = await clientPromise;

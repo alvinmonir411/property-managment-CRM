@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/app/lib/mongodbClient";
 import { auth } from "@/app/auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   try {
     const session = await auth();
     if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ message: "Unauthorized: No session found" }, { status: 401 });
     }
 
     const data = await req.json();
@@ -73,7 +75,7 @@ export async function GET(req: Request) {
   try {
     const session = await auth();
     if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ message: "Unauthorized: No session found" }, { status: 401 });
     }
 
     const client = await clientPromise;

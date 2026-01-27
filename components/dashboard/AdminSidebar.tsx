@@ -59,22 +59,7 @@ const navlinks = [
     label: "Properties",
     href: "/dashboard/admin/properties",
     icon: Home,
-  },
-  {
-    label: "Reports",
-    href: "/dashboard/admin/reports",
-    icon: FileText,
-  },
-  {
-    label: "Analytics",
-    href: "/dashboard/admin/analytics",
-    icon: BarChart3,
-  },
-  {
-    label: "Settings",
-    href: "/dashboard/admin/settings",
-    icon: Settings,
-  },
+  }
 ];
 
 export const AdminSidebar = ({

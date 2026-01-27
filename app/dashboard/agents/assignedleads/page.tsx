@@ -3,10 +3,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { axiosInstance } from "@/app/lib/axios";
 import { toast } from "react-toastify";
+import { useLeadActions } from "@/hooks/useLeadActions";
 import {
     Mail, Phone, MapPin, Calendar, DollarSign,
     Search, Filter, Flame, CheckCircle, Clock,
-    Loader2, X, ChevronRight, User, Home, FileText
+    Loader2, X, ChevronRight, User, Home, FileText, Sparkles
 } from "lucide-react";
 
 type Lead = {
@@ -44,7 +45,7 @@ type Property = {
     images: string[];
 };
 
-const NEXT_STAGES = ["Visit", "Deal", "Commission"];
+const NEXT_STAGES = ["Call", "Visit", "Deal", "Commission"];
 
 const STATUS_COLORS = {
     "Assigned": "bg-blue-100 text-blue-800 border-blue-200",
@@ -55,6 +56,7 @@ const STATUS_COLORS = {
 };
 
 export default function AssignedLeadsPage() {
+    const { executeAction, isActing } = useLeadActions();
     const [leads, setLeads] = useState<Lead[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -71,10 +73,13 @@ export default function AssignedLeadsPage() {
     const [dealPrice, setDealPrice] = useState<number | "">("");
     const [updating, setUpdating] = useState(false);
 
-    // Properties State
     const [properties, setProperties] = useState<Property[]>([]);
     const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
     const [propertySearch, setPropertySearch] = useState("");
+
+    // Smart Match State
+    const [matches, setMatches] = useState<Property[]>([]);
+    const [loadingMatches, setLoadingMatches] = useState(false);
 
     useEffect(() => {
         fetchLeads();
@@ -98,6 +103,18 @@ export default function AssignedLeadsPage() {
             toast.error("Failed to fetch leads");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchMatches = async (leadId: string) => {
+        setLoadingMatches(true);
+        try {
+            const res = await axiosInstance.get(`/api/Agents/match-properties?leadId=${leadId}`);
+            setMatches(res.data.matches || []);
+        } catch (err) {
+            console.error("Match fetch error:", err);
+        } finally {
+            setLoadingMatches(false);
         }
     };
 
@@ -125,8 +142,7 @@ export default function AssignedLeadsPage() {
 
         setUpdating(true);
         try {
-            await axiosInstance.patch("/api/Agents/convert", {
-                leadId: selectedLead._id,
+            await executeAction(selectedLead._id, "Complete", {
                 note,
                 followUpDate,
                 nextStage: nextStage || undefined,
@@ -138,7 +154,7 @@ export default function AssignedLeadsPage() {
             resetModal();
         } catch (err: any) {
             console.error(err);
-            toast.error(err.response?.data?.message || "Failed to update lead");
+            toast.error("Failed to update lead");
         } finally {
             setUpdating(false);
         }
@@ -148,8 +164,6 @@ export default function AssignedLeadsPage() {
         setSelectedLead(null);
         setNote("");
         setFollowUpDate("");
-        setNextStage("");
-        setNextStage("");
         setNextStage("");
         setDealPrice("");
         setSelectedPropertyId("");
@@ -162,6 +176,7 @@ export default function AssignedLeadsPage() {
         tomorrow.setDate(tomorrow.getDate() + 1);
         setFollowUpDate(tomorrow.toISOString().split('T')[0]);
         if (lead.propertyId) setSelectedPropertyId(lead.propertyId);
+        fetchMatches(lead._id);
     };
 
     if (loading) return (
@@ -368,9 +383,9 @@ export default function AssignedLeadsPage() {
                                             return (
                                                 <div key={idx} className="relative pl-6 border-l-2 border-gray-200 last:border-0 pb-4 last:pb-0">
                                                     <div className={`absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full ${item.action === 'Deal' ? 'bg-green-500' :
-                                                            item.action === 'Visit' ? 'bg-purple-500' :
-                                                                item.action === 'Call' ? 'bg-yellow-500' :
-                                                                    'bg-blue-400'
+                                                        item.action === 'Visit' ? 'bg-purple-500' :
+                                                            item.action === 'Call' ? 'bg-yellow-500' :
+                                                                'bg-blue-400'
                                                         }`} />
                                                     <div className="flex justify-between items-start">
                                                         <span className="text-xs font-bold text-gray-700">{item.action}</span>
@@ -387,6 +402,45 @@ export default function AssignedLeadsPage() {
                                         })
                                     ) : (
                                         <p className="text-xs text-gray-400 text-center py-4">No activity recorded yet.</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Smart Property Matching */}
+                            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
+                                <h4 className="text-sm font-bold text-blue-900 mb-4 flex items-center justify-between">
+                                    <span className="flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-blue-600" /> Smart Property Matches
+                                    </span>
+                                    {matches.length > 0 && <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded-full">{matches.length} FOUND</span>}
+                                </h4>
+
+                                <div className="space-y-3">
+                                    {loadingMatches ? (
+                                        <div className="flex items-center justify-center py-4">
+                                            <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                                        </div>
+                                    ) : matches.length > 0 ? (
+                                        matches.map(prop => (
+                                            <div key={prop._id} className="bg-white p-3 rounded-xl border border-blue-100 flex items-center gap-3 hover:border-blue-400 transition-colors cursor-pointer group"
+                                                onClick={() => {
+                                                    setSelectedPropertyId(prop._id);
+                                                    setNextStage("Visit");
+                                                    toast.info(`Selected ${prop.title} for visit`);
+                                                }}
+                                            >
+                                                <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                                                    {prop.images?.[0] ? <img src={prop.images[0]} className="w-full h-full object-cover" /> : <Home className="w-6 h-6 m-3 text-gray-400" />}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs font-bold text-gray-900 truncate">{prop.title}</p>
+                                                    <p className="text-[10px] text-blue-600 font-bold">${Number(prop.price).toLocaleString()}</p>
+                                                </div>
+                                                <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition-colors" />
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-xs text-blue-400 text-center py-4 italic">No direct matches found for this budget/location.</p>
                                     )}
                                 </div>
                             </div>

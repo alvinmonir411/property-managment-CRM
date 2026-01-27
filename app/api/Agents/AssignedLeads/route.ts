@@ -1,18 +1,19 @@
-"use server";
-
 import { auth } from "@/app/auth";
 import clientPromise from "@/app/lib/mongodbClient";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     const session = await auth();
+    console.log("DEBUG API: session", !!session, "role", (session?.user as any)?.role);
 
     if (!session) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        return NextResponse.json({ message: "Unauthorized: No session found" }, { status: 401 });
     }
 
-    if ((session.user as any).role !== "agent") {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    if (!["agent", "admin"].includes((session.user as any).role)) {
+        return NextResponse.json({ message: `Unauthorized: Role is ${(session.user as any).role}, expected agent or admin` }, { status: 401 });
     }
 
     const agentEmail = (session.user as any).email;
