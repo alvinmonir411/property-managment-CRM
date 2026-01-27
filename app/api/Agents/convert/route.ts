@@ -34,12 +34,18 @@ export async function PATCH(req: Request) {
         // Add note (Legacy support)
         if (note) updates.notes = lead.notes ? lead.notes + "\n" + note : note;
 
+
         // Update follow-up date
         if (followUpDate) {
             updates.nextFollowUpDate = followUpDate;
             updates.followUpCount = (lead.followUpCount || 0) + 1;
             historyEntry.followUpDate = followUpDate;
         }
+
+        // Action updates - Score & Timestamp
+        updates.lastContactedAt = new Date().toISOString();
+        updates.score = (lead.score || 50) + 5; // Increment score for activity
+
 
         // Update status
         if (nextStage) updates.status = nextStage;

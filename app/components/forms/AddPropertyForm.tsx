@@ -10,6 +10,16 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+const InputGroup = ({ icon: Icon, label, children }: { icon: any; label: string; children: React.ReactNode }) => (
+    <div className="space-y-2">
+        <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <Icon className="w-4 h-4 text-blue-500" />
+            {label}
+        </label>
+        {children}
+    </div>
+);
+
 export default function AddPropertyForm() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -57,14 +67,7 @@ export default function AddPropertyForm() {
         }
     };
 
-    const InputGroup = ({ icon: Icon, label, children }: { icon: any, label: string, children: React.ReactNode }) => (
-        <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Icon className="w-4 h-4 text-blue-500" /> {label}
-            </label>
-            {children}
-        </div>
-    );
+
 
     return (
         <form onSubmit={handleSubmit} className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

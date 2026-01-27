@@ -84,6 +84,9 @@ export async function GET(req: Request) {
 
     let query = {};
 
+    const url = new URL(req.url);
+    const assignedAgent = url.searchParams.get("assignedAgent");
+
     if (userRole !== "admin") {
       query = {
         $or: [
@@ -91,6 +94,11 @@ export async function GET(req: Request) {
           { assignedAgent: userEmail },
         ],
       };
+    } else {
+      // Admin can filter by agent
+      if (assignedAgent) {
+        query = { assignedAgent: assignedAgent };
+      }
     }
 
     const leads = await db

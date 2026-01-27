@@ -3,9 +3,47 @@ import clientPromise from '@/app/lib/mongodbClient'
 import { auth } from '@/app/auth'
 import { ObjectId } from 'mongodb'
 
+export async function GET(
+    req: Request,
+    props: { params: Promise<{ id: string }> }
+) {
+    const params = await props.params;
+    try {
+        const session = await auth()
+        if (!session) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+        }
+
+        const userRole = (session.user as any)?.role
+        if (userRole !== 'admin') {
+            return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+        }
+
+        const client = await clientPromise
+        const db = client.db("monir")
+
+        const user = await db.collection("user").findOne({
+            _id: new ObjectId(params.id)
+        })
+
+        if (!user) {
+            return NextResponse.json({ message: 'User not found' }, { status: 404 })
+        }
+
+        return NextResponse.json({ success: true, user }, { status: 200 })
+
+    } catch (error: any) {
+        console.error('API Error:', error)
+        return NextResponse.json({
+            message: 'Internal server error',
+            error: error.message
+        }, { status: 500 })
+    }
+}
+
 export async function PATCH(
     req: Request,
-    props: { params: Promise<{ id: string }> } // Promise হিসেবে ডিফাইন করো
+    props: { params: Promise<{ id: string }> }
 ) {
     const params = await props.params;
     const { id } = params;

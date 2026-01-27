@@ -238,6 +238,7 @@ export default function EditLeadForm({ id }: { id: string }) {
               type="date"
               label="Next Follow-up"
               name="nextFollowUpDate"
+              min={new Date().toISOString().split("T")[0]}
               value={lead.nextFollowUpDate?.slice(0, 10)}
               onChange={handleChange}
             />

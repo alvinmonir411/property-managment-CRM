@@ -20,6 +20,7 @@ import {
 import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useLeadActions } from "@/hooks/useLeadActions";
 
 interface Lead {
   _id: string;
@@ -57,6 +58,7 @@ export const LeadsListView = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { executeAction, isActing } = useLeadActions();
 
   const userRole = (session?.user as any)?.role;
   const isAdmin = userRole === "admin";
@@ -334,32 +336,40 @@ export const LeadsListView = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => executeAction(lead._id, "Call", { phone: lead.phone })}
+                  title="Call Lead"
+                  className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all border border-blue-200"
+                >
+                  <Phone className="w-4 h-4" />
+                </button>
+
                 <button
                   onClick={() => setSelectedLead(lead)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
                 >
                   <Eye className="w-4 h-4" />
                   <span>View Details</span>
                 </button>
+
+                <button
+                  onClick={() => executeAction(lead._id, "Note", { note: "Quick nudge" })} // Placeholder for now, ideally opens modal
+                  title="Add Quick Note"
+                  className="p-2.5 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 transition-all border border-purple-200"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+
                 {isAdmin && (
-                  <>
-                    <Link
-                      href={`/dashboard/admin/leads/edit/${lead._id}`}
-                      className="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all border border-emerald-200"
-                      title="Edit Lead"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(lead._id)}
-                      disabled={isDeleting}
-                      className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-all border border-red-200 disabled:opacity-50"
-                      title="Delete Lead"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </>
+                  <button
+                    onClick={() => handleDelete(lead._id)}
+                    disabled={isDeleting}
+                    className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-all border border-red-200 disabled:opacity-50"
+                    title="Delete Lead"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 )}
               </div>
             </div>

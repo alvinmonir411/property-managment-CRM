@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { Users, TrendingUp, DollarSign, Award, Loader2, Search, ArrowUpRight, ArrowDownRight, Briefcase } from "lucide-react";
 import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,7 @@ export default function AdminAgentsPage() {
             const response = await fetch("/api/admin/agentfetch");
             const data = await response.json();
             if (data.success) {
-                setAgents(data.agents || []); // Fallback to empty array
+                setAgents(data.agents || []);
             }
         } catch (error) {
             toast.error("Network synchronization failed");
@@ -128,15 +129,17 @@ export default function AdminAgentsPage() {
                                 return (
                                     <tr key={agent._id} className="group hover:bg-slate-50/80 transition-all duration-300">
                                         <td className="px-8 py-5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-11 h-11 bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center font-black shadow-lg shadow-purple-100 group-hover:scale-110 transition-transform">
-                                                    {agent?.name ? agent.name.charAt(0).toUpperCase() : "A"}
+                                            <Link href={`/dashboard/admin/agents/${agent._id}`} className="block group/item">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-11 h-11 bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center font-black shadow-lg shadow-purple-100 group-hover/item:scale-110 transition-transform">
+                                                        {agent?.name ? agent.name.charAt(0).toUpperCase() : "A"}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-slate-800 text-base group-hover/item:text-purple-600 transition-colors">{agent.name}</p>
+                                                        <p className="text-xs text-slate-400 font-medium">{agent.email}</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-800 text-base">{agent.name}</p>
-                                                    <p className="text-xs text-slate-400 font-medium">{agent.email}</p>
-                                                </div>
-                                            </div>
+                                            </Link>
                                         </td>
                                         <td className="px-6 py-5 text-center">
                                             <div className="flex flex-col items-center">
