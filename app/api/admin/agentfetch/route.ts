@@ -2,7 +2,7 @@ import { auth } from "@/app/auth";
 import clientPromise from "@/app/lib/mongodbClient";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, res: Response) {
+export async function GET(req: Request) {
   const session = await auth();
   try {
     if (!session) {

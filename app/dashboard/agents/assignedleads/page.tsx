@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import {
     Mail, Phone, MapPin, Calendar, DollarSign,
     Search, Filter, Flame, CheckCircle, Clock,
-    Loader2, X, ChevronRight, User
+    Loader2, X, ChevronRight, User, Home, FileText
 } from "lucide-react";
 
 type Lead = {
@@ -25,6 +25,23 @@ type Lead = {
     notes?: string;
     followUpCount?: number;
     dealPrice?: number;
+    propertyId?: string;
+    history?: {
+        date: string;
+        action: string;
+        note?: string;
+        propertyId?: string;
+        agentName?: string;
+    }[];
+};
+
+type Property = {
+    _id: string;
+    title: string;
+    price: string;
+    location: string;
+    type: string;
+    images: string[];
 };
 
 const NEXT_STAGES = ["Visit", "Deal", "Commission"];
@@ -54,9 +71,24 @@ export default function AssignedLeadsPage() {
     const [dealPrice, setDealPrice] = useState<number | "">("");
     const [updating, setUpdating] = useState(false);
 
+    // Properties State
+    const [properties, setProperties] = useState<Property[]>([]);
+    const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
+    const [propertySearch, setPropertySearch] = useState("");
+
     useEffect(() => {
         fetchLeads();
+        fetchProperties();
     }, []);
+
+    const fetchProperties = async () => {
+        try {
+            const res = await axiosInstance.get("/api/Agents/properties");
+            setProperties(res.data);
+        } catch (err) {
+            console.error("Failed to fetch properties");
+        }
+    };
 
     const fetchLeads = async () => {
         try {
@@ -86,8 +118,8 @@ export default function AssignedLeadsPage() {
     const handleUpdateLead = async () => {
         if (!selectedLead) return;
 
-        if (nextStage === "Deal" && !dealPrice) {
-            toast.error("Please enter deal price");
+        if (nextStage === "Deal" && !selectedPropertyId && !selectedLead.propertyId) {
+            toast.error("Please link a property first (in Visit stage)");
             return;
         }
 
@@ -99,6 +131,7 @@ export default function AssignedLeadsPage() {
                 followUpDate,
                 nextStage: nextStage || undefined,
                 dealPrice: nextStage === "Deal" ? dealPrice : undefined,
+                propertyId: selectedPropertyId || undefined,
             });
             toast.success("Lead updated successfully!");
             await fetchLeads();
@@ -116,7 +149,11 @@ export default function AssignedLeadsPage() {
         setNote("");
         setFollowUpDate("");
         setNextStage("");
+        setNextStage("");
+        setNextStage("");
         setDealPrice("");
+        setSelectedPropertyId("");
+        setPropertySearch("");
     };
 
     const openModal = (lead: Lead) => {
@@ -124,6 +161,7 @@ export default function AssignedLeadsPage() {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         setFollowUpDate(tomorrow.toISOString().split('T')[0]);
+        if (lead.propertyId) setSelectedPropertyId(lead.propertyId);
     };
 
     if (loading) return (
@@ -318,15 +356,40 @@ export default function AssignedLeadsPage() {
                                 />
                             </div>
 
-                            {/* Previous Notes (History) */}
-                            {selectedLead.notes && (
-                                <div className="bg-gray-50 border rounded-lg p-3">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">History</label>
-                                    <div className="text-xs text-gray-600 whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar">
-                                        {selectedLead.notes}
-                                    </div>
+                            {/* Activity Timeline */}
+                            <div className="bg-gray-50 border rounded-xl p-4">
+                                <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-blue-600" /> Activity History
+                                </h4>
+                                <div className="space-y-4 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                                    {selectedLead.history && selectedLead.history.length > 0 ? (
+                                        [...selectedLead.history].reverse().map((item, idx) => {
+                                            const prop = item.propertyId ? properties.find(p => p._id === item.propertyId) : null;
+                                            return (
+                                                <div key={idx} className="relative pl-6 border-l-2 border-gray-200 last:border-0 pb-4 last:pb-0">
+                                                    <div className={`absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full ${item.action === 'Deal' ? 'bg-green-500' :
+                                                            item.action === 'Visit' ? 'bg-purple-500' :
+                                                                item.action === 'Call' ? 'bg-yellow-500' :
+                                                                    'bg-blue-400'
+                                                        }`} />
+                                                    <div className="flex justify-between items-start">
+                                                        <span className="text-xs font-bold text-gray-700">{item.action}</span>
+                                                        <span className="text-[10px] text-gray-400">{new Date(item.date).toLocaleDateString()}</span>
+                                                    </div>
+                                                    {item.note && <p className="text-xs text-gray-600 mt-0.5">{item.note}</p>}
+                                                    {prop && (
+                                                        <div className="mt-1 flex items-center gap-1 text-[10px] text-gray-500 bg-white border px-1.5 py-0.5 rounded w-fit">
+                                                            <Home className="w-3 h-3" /> {prop.title}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <p className="text-xs text-gray-400 text-center py-4">No activity recorded yet.</p>
+                                    )}
                                 </div>
-                            )}
+                            </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 {/* Follow Up Date */}
@@ -364,21 +427,136 @@ export default function AssignedLeadsPage() {
                                 </div>
                             </div>
 
-                            {/* Deal Price Logic */}
-                            {nextStage === "Deal" && (
-                                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Deal Value / Price</label>
-                                    <div className="relative">
-                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+
+                            {/* Visit Stage - Select Property */}
+                            {nextStage === "Visit" && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Select Property for Visit</label>
+
+                                    {/* Property Search */}
+                                    <div className="mb-2 relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
                                         <input
-                                            type="number"
-                                            value={dealPrice}
-                                            onChange={(e) => setDealPrice(Number(e.target.value))}
-                                            placeholder="0.00"
-                                            className="w-full pl-9 pr-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none text-sm"
+                                            type="text"
+                                            placeholder="Paste Property ID or Search Title..."
+                                            value={propertySearch}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setPropertySearch(val);
+                                                // Auto-select if exact ID match
+                                                const exactMatch = properties.find(p => p._id === val);
+                                                if (exactMatch) setSelectedPropertyId(exactMatch._id);
+                                            }}
+                                            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
                                         />
                                     </div>
-                                    <p className="text-xs text-green-600 mt-1">Please confirm the final deal amount.</p>
+
+                                    <div className="relative">
+                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                        <select
+                                            value={selectedPropertyId}
+                                            onChange={(e) => setSelectedPropertyId(e.target.value)}
+                                            className="w-full pl-9 pr-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                                        >
+                                            <option value="">-- Choose a Property --</option>
+                                            {properties
+                                                .filter(p =>
+                                                    p.title.toLowerCase().includes(propertySearch.toLowerCase()) ||
+                                                    p._id === propertySearch.trim()
+                                                )
+                                                .map(p => (
+                                                    <option key={p._id} value={p._id}>
+                                                        {p.title} - ${Number(p.price).toLocaleString()}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
+                                    <p className="text-xs text-blue-600 mt-1 mb-3">Please select the property the client is visiting.</p>
+
+                                    {selectedPropertyId && (() => {
+                                        const prop = properties.find(p => p._id === selectedPropertyId);
+                                        if (!prop) return null;
+                                        return (
+                                            <div className="bg-gray-50 rounded-xl p-3 border border-gray-200 flex gap-3 animate-in fade-in slide-in-from-bottom-2">
+                                                <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                                    {prop.images && prop.images[0] ? (
+                                                        <img src={prop.images[0]} alt={prop.title} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
+                                                            <Home className="w-8 h-8" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-bold text-gray-900 truncate">{prop.title}</p>
+                                                    <p className="text-xs text-gray-500 truncate mb-1">{prop.location}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">{prop.type}</span>
+                                                        <span className="text-sm font-bold text-gray-900">${Number(prop.price).toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            )}
+
+                            {/* Deal Price Logic */}
+                            {nextStage === "Deal" && (
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-300 bg-green-50 p-4 rounded-xl border border-green-100">
+                                    <h4 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                                        <DollarSign className="w-5 h-5" /> Deal Closure & Commission
+                                    </h4>
+
+                                    {selectedPropertyId ? (
+                                        (() => {
+                                            const prop = properties.find(p => p._id === selectedPropertyId);
+                                            // Fallback logic handled by parent check or similar, simplified for UI clarity
+
+                                            if (!prop) return <p className="text-sm text-red-600">Linked property details not found or not available.</p>;
+
+                                            const price = Number(prop.price);
+                                            const commission = price * 0.30;
+
+                                            return (
+                                                <div className="space-y-4">
+                                                    {/* Property Card */}
+                                                    <div className="bg-white rounded-xl p-3 border border-green-100 flex gap-3 shadow-sm">
+                                                        <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                                            {prop.images && prop.images[0] ? (
+                                                                <img src={prop.images[0]} alt={prop.title} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
+                                                                    <Home className="w-6 h-6" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-bold text-gray-900 truncate">{prop.title}</p>
+                                                            <p className="text-xs text-gray-500 truncate">{prop.location}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between text-sm">
+                                                            <span className="text-gray-600">Sale Price:</span>
+                                                            <span className="font-medium text-gray-900">${price.toLocaleString()}</span>
+                                                        </div>
+                                                        <div className="border-t border-green-200 my-1"></div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-green-700 font-bold">Your Commission (30%):</span>
+                                                            <span className="text-xl font-bold text-green-700">${commission.toLocaleString()}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()
+                                    ) : (
+                                        <div className="text-center text-amber-600 text-sm">
+                                            <p>No property linked to this lead.</p>
+                                            <p className="mt-1">Please go back to 'Visit' stage and select a property first.</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
