@@ -5,6 +5,7 @@ import { Plus, Home, MapPin, Bed, Bath, Layout, Loader2, Search, X, Tag, Buildin
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { axiosInstance } from "@/app/lib/axios";
+import { toast } from "react-toastify";
 
 type Property = {
     _id: string;
@@ -26,7 +27,7 @@ type Property = {
 const STATUS_COLORS: any = {
     "Available": "bg-green-100 text-green-800 border-green-200",
     "Sold": "bg-red-100 text-red-800 border-red-200",
-    "Rent": "bg-blue-100 text-blue-800 border-blue-200",
+    "Rent": "bg-purple-100 text-purple-800 border-purple-200",
     "Sale": "bg-purple-100 text-purple-800 border-purple-200",
 };
 
@@ -83,7 +84,7 @@ function PropertiesContent() {
 
     if (loading) return (
         <div className="flex h-96 items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
         </div>
     );
 
@@ -96,53 +97,16 @@ function PropertiesContent() {
                     <p className="text-gray-500">Manage your property listings</p>
                 </div>
                 <div className="flex gap-3 items-center">
-                    <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100 text-blue-700 font-medium text-sm">
+                    <div className="bg-purple-50 px-4 py-2 rounded-lg border border-purple-100 text-purple-700 font-medium text-sm">
                         Total: {properties.length}
                     </div>
                     <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-100 text-green-700 font-medium text-sm">
                         Available: {properties.filter(p => p.status === 'Available').length}
                     </div>
-                    <div className="relative">
-                        <input
-                            type="file"
-                            id="bulk-import-props"
-                            className="hidden"
-                            accept=".json"
-                            onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                const reader = new FileReader();
-                                reader.onload = async (evt) => {
-                                    try {
-                                        const items = JSON.parse(evt.target?.result as string);
-                                        const res = await fetch("/api/admin/bulk-import", {
-                                            method: "POST",
-                                            body: JSON.stringify({ type: 'properties', items })
-                                        });
-                                        const data = await res.json();
-                                        if (data.success) {
-                                            alert(data.message);
-                                            window.location.reload();
-                                        } else {
-                                            alert(data.message);
-                                        }
-                                    } catch (err) {
-                                        alert("Invalid JSON format");
-                                    }
-                                };
-                                reader.readAsText(file);
-                            }}
-                        />
-                        <label
-                            htmlFor="bulk-import-props"
-                            className="bg-slate-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-600 transition flex items-center gap-2 shadow-sm cursor-pointer"
-                        >
-                            🚀 Bulk Import
-                        </label>
-                    </div>
+
                     <Link
-                        href="/dashboard/agents/add-property"
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm hover:shadow ml-2"
+                        href="/dashboard/admin/add-property"
+                        className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition flex items-center gap-2 shadow-sm hover:shadow ml-2"
                     >
                         <Plus className="w-5 h-5" /> Add Property
                     </Link>
@@ -158,7 +122,7 @@ function PropertiesContent() {
                         placeholder="Search properties..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition"
                     />
                 </div>
 
@@ -166,7 +130,7 @@ function PropertiesContent() {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-gray-50 border px-3 py-2 rounded-lg text-sm font-medium text-gray-700 outline-none focus:ring-2 focus:ring-blue-500"
+                        className="bg-gray-50 border px-3 py-2 rounded-lg text-sm font-medium text-gray-700 outline-none focus:ring-2 focus:ring-purple-500"
                     >
                         <option value="All">All Statuses</option>
                         <option value="Available">Available</option>
@@ -176,7 +140,7 @@ function PropertiesContent() {
                     <select
                         value={typeFilter}
                         onChange={(e) => setTypeFilter(e.target.value)}
-                        className="bg-gray-50 border px-3 py-2 rounded-lg text-sm font-medium text-gray-700 outline-none focus:ring-2 focus:ring-blue-500"
+                        className="bg-gray-50 border px-3 py-2 rounded-lg text-sm font-medium text-gray-700 outline-none focus:ring-2 focus:ring-purple-500"
                     >
                         <option value="All">All Types</option>
                         <option value="Sale">For Sale</option>
@@ -192,7 +156,7 @@ function PropertiesContent() {
                     <p className="text-gray-500 font-medium">No properties found matching your filters</p>
                     <button
                         onClick={() => { setSearchQuery(""); setStatusFilter("All"); setTypeFilter("All"); }}
-                        className="mt-2 text-blue-600 text-sm hover:underline"
+                        className="mt-2 text-purple-600 text-sm hover:underline"
                     >
                         Clear filters
                     </button>
@@ -228,7 +192,7 @@ function PropertiesContent() {
                             {/* Content */}
                             <div className="flex justify-between items-start mb-2">
                                 <h3 className="font-bold text-lg text-gray-900 line-clamp-1" title={property.title}>{property.title}</h3>
-                                <p className="font-bold text-blue-600">${Number(property.price).toLocaleString()}</p>
+                                <p className="font-bold text-purple-600">${Number(property.price).toLocaleString()}</p>
                             </div>
 
                             <div className="flex items-center gap-1 text-xs text-gray-500 mb-4">
@@ -257,14 +221,14 @@ function PropertiesContent() {
                             <div className="border-t pt-4 mt-auto flex gap-3">
                                 <button
                                     onClick={() => handleViewDetails(property._id)}
-                                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 transition"
+                                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-purple-600 text-white font-medium text-sm hover:bg-purple-700 transition"
                                 >
                                     View Details
                                 </button>
                                 <button
                                     onClick={() => {
                                         navigator.clipboard.writeText(property._id);
-                                        window.alert("Copied ID!");
+                                        toast("Copied ID!");
                                     }}
                                     title="Copy ID"
                                     className="px-3 py-2 rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 transition"
@@ -318,24 +282,24 @@ function PropertiesContent() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-3xl font-bold text-blue-600">${Number(selectedProperty.price).toLocaleString()}</p>
+                                    <p className="text-3xl font-bold text-purple-600">${Number(selectedProperty.price).toLocaleString()}</p>
                                     <p className="text-sm text-gray-400">Guide Price</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-3 gap-4 mb-8">
                                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center">
-                                    <Bed className="w-6 h-6 text-blue-500 mb-2" />
+                                    <Bed className="w-6 h-6 text-purple-500 mb-2" />
                                     <span className="font-bold text-gray-900">{selectedProperty.bedrooms || '-'}</span>
                                     <span className="text-xs text-gray-500 uppercase tracking-wide">Bedrooms</span>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center">
-                                    <Bath className="w-6 h-6 text-blue-500 mb-2" />
+                                    <Bath className="w-6 h-6 text-purple-500 mb-2" />
                                     <span className="font-bold text-gray-900">{selectedProperty.bathrooms || '-'}</span>
                                     <span className="text-xs text-gray-500 uppercase tracking-wide">Bathrooms</span>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center">
-                                    <Layout className="w-6 h-6 text-blue-500 mb-2" />
+                                    <Layout className="w-6 h-6 text-purple-500 mb-2" />
                                     <span className="font-bold text-gray-900">{selectedProperty.area || '-'}</span>
                                     <span className="text-xs text-gray-500 uppercase tracking-wide">Sq Ft</span>
                                 </div>
@@ -405,7 +369,7 @@ function PropertiesContent() {
                                         navigator.clipboard.writeText(selectedProperty._id);
                                         window.alert("Property ID copied to clipboard!");
                                     }}
-                                    className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center gap-2"
+                                    className="px-6 py-2.5 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition shadow-lg shadow-purple-200 flex items-center gap-2"
                                 >
                                     <Copy className="w-4 h-4" /> Copy Property ID
                                 </button>
@@ -420,7 +384,7 @@ function PropertiesContent() {
 
 export default function PropertiesPage() {
     return (
-        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-blue-600" /></div>}>
+        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-purple-600" /></div>}>
             <PropertiesContent />
         </Suspense>
     );

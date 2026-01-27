@@ -61,11 +61,6 @@ const navlinks = [
     href: "/dashboard/admin/properties",
     icon: Home,
   },
-  {
-    label: "Add Property",
-    href: "/dashboard/agents/add-property", // Reusing the same form/page for now
-    icon: Plus,
-  }
 ];
 
 export const AdminSidebar = ({
