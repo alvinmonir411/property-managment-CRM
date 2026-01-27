@@ -5,9 +5,10 @@ import { ObjectId } from 'mongodb'
 
 export async function PATCH(
     req: Request,
-    { params }: { params: Promise<{ id: string }> } // Promise হিসেবে ডিফাইন করো
+    props: { params: Promise<{ id: string }> } // Promise হিসেবে ডিফাইন করো
 ) {
-    const { id } = await params;
+    const params = await props.params;
+    const { id } = params;
     const data = await req.json();
     try {
         const session = await auth()
@@ -56,8 +57,9 @@ export async function PATCH(
 
 export async function DELETE(
     req: Request,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
+    const params = await props.params;
     try {
         const session = await auth()
         if (!session) {

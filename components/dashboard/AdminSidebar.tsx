@@ -18,6 +18,7 @@ import {
   FileText,
   BarChart3,
   User,
+  Briefcase,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,11 @@ const navlinks = [
     label: "Asign Agent",
     href: "/dashboard/admin/asignAgents",
     icon: User,
+  },
+  {
+    label: "Agents",
+    href: "/dashboard/admin/agents",
+    icon: Briefcase,
   },
   {
     label: "Properties",

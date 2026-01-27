@@ -5,8 +5,9 @@ import { NextResponse } from "next/server";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  props: { params: Promise<{ id: string }> },
 ) {
+  const params = await props.params;
   try {
     const { id: leadId } = await params;
     // 1. Authentication Check
@@ -48,6 +49,14 @@ export async function PATCH(
         },
       },
     );
+
+    // 5. Update Agent Stats (Increment Assigned Leads Count)
+    if (result.modifiedCount > 0) {
+      await db.collection("user").updateOne(
+        { email: assignedAgent },
+        { $inc: { assignedLeadsCount: 1 } }
+      );
+    }
 
     if (result.matchedCount === 0) {
       return NextResponse.json({ message: "Lead not found" }, { status: 404 });

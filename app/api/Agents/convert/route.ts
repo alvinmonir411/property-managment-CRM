@@ -79,13 +79,17 @@ export async function PATCH(req: Request) {
             historyEntry.dealPrice = price;
             historyEntry.commission = commission;
 
-            // Update Agent's Total Commission
-            // Assuming agent is stored in session or we use the lead's assigned agent
-            // The lead has assignedAgent (email). We need to update the user with that email.
+            // Update Agent's Total Commission and Stats
             if (lead.assignedAgent) {
                 await db.collection("user").updateOne(
                     { email: lead.assignedAgent },
-                    { $inc: { commission: commission } }
+                    {
+                        $inc: {
+                            commission: commission,
+                            dealsClosed: 1,
+                            totalSalesValue: price
+                        }
+                    }
                 );
             }
 

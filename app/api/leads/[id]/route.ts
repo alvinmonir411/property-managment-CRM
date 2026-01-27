@@ -5,8 +5,9 @@ import { ObjectId } from "mongodb";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  props: { params: Promise<{ id: string }> },
 ) {
+  const params = await props.params;
   try {
     // 1. Session check
     const session = await auth();
@@ -65,8 +66,9 @@ export async function GET(
 }
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } },
+  props: { params: Promise<{ id: string }> },
 ) {
+  const params = await props.params;
   try {
     const session = await auth();
     if (!session) {
