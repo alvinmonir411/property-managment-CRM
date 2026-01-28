@@ -1,101 +1,89 @@
-# 🏠 EliteProp SaaS - Real Estate CRM & Management Platform
+# 🏠 EliteProp SaaS - Real Estate CRM & Management Platform (Next.js 16)
 
-EliteProp is a high-performance, production-grade SaaS solution designed for Real Estate Agencies. It streamlines the lifecycle of a lead from initial contact to successful deal closure, featuring automated scoring, property matching, and task management.
-
----
-
-## 🌟 Professional Features
-
-### 🏢 Agency Administration
-- **Command Center**: Real-time KPI dashboard (Revenue, Hot Leads, Pipeline Health).
-- **Agent Leaderboard**: Track performance with sales and deal-count metrics.
-- **Bulk Import**: Rapidly populate the platform with thousands of Leads/Properties via JSON.
-- **Asset Inventory**: Centralized management of properties (Available/Sold/Rent).
-
-### 🚀 Agent Productivity
-- **Smart Pipeline**: Kanban-style tracking of Stage moves (Assigned -> Call -> Visit -> Deal).
-- **Property Matching**: Automatic recommendation of properties based on lead budget and location.
-- **WhatsApp Automation**: Personalized quick-reply templates to close deals 10x faster.
-- **Interaction History**: Secure logging of every call, note, and stage change.
-
-### � Ecosystem Integration
-- **Notification Center**: Real-time alerts for new assignments and overdue tasks.
-- **Activity Undo**: Safety net to revert accidental stage moves or activity logs.
-- **Role-Based Access (RBAC)**: Distinct workflows for Admins, Agents, and Agency Assistants.
+EliteProp is a high-performance, production-grade SaaS solution designed for Real Estate Agencies, built on the cutting edge of the Next.js ecosystem. It streamlines the lifecycle of a lead from initial contact to successful deal closure, featuring automated scoring, property matching, and task management.
 
 ---
 
-## 🛠️ Technology Stack
+## 🚀 Cutting-Edge Tech Stack
 
-- **Framework**: [Next.js 14+](https://nextjs.org/) (App Router & Server Actions)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) (Fully Responsive, Premium Dark/Light Modes)
-- **Database**: [MongoDB](https://www.mongodb.com/) (Native Driver for maximum performance)
-- **Auth**: [NextAuth.js v5](https://authjs.dev/) (Enterprise-grade session management)
+EliteProp is built using the latest stable and experimental versions of top-tier technologies to ensure maximum performance and developer experience:
+
+- **Framework**: [Next.js 16.1.4](https://nextjs.org/) (App Router, Turbopack, Server Components)
+- **Library**: [React 19.2.3](https://react.dev/) (Concurrent Mode, Advanced Hooks)
+- **Styling**: [Tailwind CSS 4.0+](https://tailwindcss.com/) (Next-gen CSS performance)
+- **Database**: [MongoDB](https://www.mongodb.com/) (Native Driver for optimized persistence)
+- **Auth**: [NextAuth.js v5 (Beta 30)](https://authjs.dev/) (Enterprise-grade security)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/) (Smooth UI transitions)
 - **Icons**: [Lucide React](https://lucide.dev/)
-- **State/API**: [Axios](https://axios-http.com/) with interceptors & React Hooks.
 
 ---
 
-## 📋 Standard Workflows
+## 🌟 Professional Features by Role
 
-### 1. Lead Lifecycle
-1. **Intake**: Lead is created (Admin/Assistant) and assigned a **Score** based on budget/timeline.
-2. **Assignment**: Admin assigns lead to an Agent -> Agent receives a **Notification**.
-3. **Engagement**: Agent logs "Call" or "WhatsApp" -> Lead moves to **Call** stage.
-4. **Showing**: Agent matches property -> Schedules **Visit**.
-5. **Closing**: Negotiation leads to **Deal** -> Property marked **Sold** -> **Commission** logged.
+### 👑 Agency Administration
+- **Global Command Center**: Real-time KPI dashboard tracking Revenue, Hot Leads, and Pipeline Health.
+- **Agent Leaderboard**: Performance metrics based on sales, deal counts, and commission.
+- **User Management**: Complete control over platform users (Admin, Agent, Manager roles).
+- **Bulk Intelligence**: JSON-based bulk import for rapid lead and property ingestion.
+- **Inventory Control**: Comprehensive management of property assets (Sale/Rent status).
 
-### 2. Bulk Management
-- **Format**: [
-    ```json
-    {
-      "fullName": "Jane Doe",
-      "email": "jane@example.com",
-      "phone": "+123456789",
-      "location": "Downtown",
-      "budgetMax": "500000"
-    }
-    ```
-  ]
-- **Action**: Use the "🚀 Bulk Import" button in Leads/Properties tabs.
+### � Agent Workspace
+- **Smart Pipeline**: Visual Kanban-style tracking (Assigned -> Call -> Visit -> Deal -> Commission).
+- **Property Matching**: Automated matching of leads to available properties based on budget, type, and location.
+- **Communication Hub**: Integrated WhatsApp quick-templates and interaction logging.
+- **Task Priority**: Deadlines and follow-up reminders prioritized by lead urgency.
+
+### 👤 User/Client Portal
+- **Dashboard Overview**: Personalized view of active leads and property interests.
+- **Profile Management**: Direct control over profile details, names, and security credentials.
+- **Activity Feed**: Stay updated on the latest status of property inquiries.
 
 ---
 
-## � Getting Started
+## � Advanced Search & Filtering
+
+EliteProp features a powerful, context-aware global search system:
+- **Property ID Search**: Directly locate leads interested in a specific property using unique IDs (e.g., `PROP-123`).
+- **Multi-Factor Filtering**: Filter leads by Purpose (**Rent/Buy/Invest**), Name, Email, or Phone.
+- **Smart Reset**: Clearing search inputs automatically resets filters to "Show All," ensuring a seamless user experience.
+
+---
+
+## �️ Profile & Security Management
+- **Unified Profile System**: All roles (Admin, Agent, User) can update their **Full Name** and **Passwords** securely.
+- **Next-Gen Session Sync**: Profile updates are persisted to MongoDB and instantly synchronized with the active session.
+- **Dynamic Header**: Smart name display that prioritizes the user's name over their email for a professional touch.
+
+---
+
+## 🛠️ Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- MongoDB Atlas connection string
+- Node.js 20+
+- MongoDB Atlas account
 
 ### Installation
 1. Clone the repository.
-2. Install dependencies:
+2. Install dependencies (optimized for React 19):
    ```bash
    npm install
    ```
-3. Configure environment variables in `.env.local`:
+3. Configure your secret variables in `.env.local`:
    ```env
    MONGODB_URI=your_mongodb_uri
    AUTH_SECRET=your_nextauth_secret
+   NEXTAUTH_URL=http://localhost:3000
    ```
-4. Start the development server:
+4. Launch the Turbopack-powered dev server:
    ```bash
    npm run dev
    ```
 
-### Deployment (Production)
-The platform is optimized for [Vercel](https://vercel.com/):
-- Connect your GitHub repo.
-- Add ENV variables in Vercel Dashboard.
-- Automatic CI/CD on every push.
+### Production Deployment
+EliteProp is pre-configured for **Vercel** deployment:
+- `npm run build` generates a highly optimized edge-compatible bundle.
+- Support for Middleware-based RBAC and secure API endpoints.
 
 ---
 
-## ✅ Quality Standards
-- **Responsive**: Mobile-first design for agents on the move.
-- **Secure**: RBAC enforced at both UI and API levels.
-- **Scalable**: Document-based architecture ready for high-volume data.
-
----
-*Created with ❤️ for High-Performance Real Estate Teams.*
-
+*Built with ❤️ for High-Performance Real Estate Teams.*
