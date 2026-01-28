@@ -48,11 +48,20 @@ export default function EditLeadForm({ id }: { id: string }) {
     e.preventDefault();
     setSaving(true);
     try {
-      await axiosInstance.patch(`/api/leads/${id}`, lead);
+      // Create a copy of the lead data for submission
+      const submissionData = { ...lead };
+
+      // Ensure numeric fields are actually numbers
+      if (submissionData.budgetMin) submissionData.budgetMin = Number(submissionData.budgetMin);
+      if (submissionData.budgetMax) submissionData.budgetMax = Number(submissionData.budgetMax);
+      if (submissionData.score) submissionData.score = Number(submissionData.score);
+
+      await axiosInstance.patch(`/api/leads/${id}`, submissionData);
       toast.success("Lead updated successfully");
       router.back();
       router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("Update error:", err);
       toast.error("Update failed");
     } finally {
       setSaving(false);
@@ -104,6 +113,14 @@ export default function EditLeadForm({ id }: { id: string }) {
               name="location"
               value={lead.location}
               onChange={handleChange}
+            />
+            <Input
+              icon={Home}
+              label="Property ID"
+              name="propertyId"
+              value={lead.propertyId || ""}
+              onChange={handleChange}
+              placeholder="e.g. PROP-123"
             />
           </Grid>
         </Section>
@@ -195,6 +212,10 @@ export default function EditLeadForm({ id }: { id: string }) {
                 "Contacted",
                 "Qualified",
                 "Assigned",
+                "Call",
+                "Visit",
+                "Deal",
+                "Commission",
                 "Closed",
                 "Lost",
               ]}

@@ -7,12 +7,14 @@ import {
     Menu,
     ChevronDown,
     Mail,
-    X
+    X,
+    User,
+    Shield
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 
 export const Header = ({
@@ -21,7 +23,10 @@ export const Header = ({
     setIsMobileOpen: (v: boolean) => void
 }) => {
     const pathname = usePathname()
+    const router = useRouter()
     const { data: session } = useSession()
+    const [searchQuery, setSearchQuery] = React.useState("")
+    const [isProfileOpen, setIsProfileOpen] = React.useState(false)
 
     // Simple breadcrumb logic
     const pathParts = pathname.split('/').filter(Boolean)
@@ -32,6 +37,31 @@ export const Header = ({
 
     const [notifications, setNotifications] = React.useState<any[]>([])
     const [isNotifOpen, setIsNotifOpen] = React.useState(false)
+
+    const onSearchChange = (val: string) => {
+        setSearchQuery(val);
+        if (val.trim() === "" && pathname.includes('/leads')) {
+            const userRole = user?.role || 'user';
+            let basePath = '/dashboard/admin/leads';
+            if (userRole === 'agent') basePath = '/dashboard/agents/leads';
+            router.push(basePath);
+        }
+    }
+
+    const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            const userRole = user?.role || 'user';
+            let basePath = '/dashboard';
+            if (userRole === 'admin') basePath = '/dashboard/admin/leads';
+            else if (userRole === 'agent') basePath = '/dashboard/agents/leads';
+
+            if (searchQuery.trim()) {
+                router.push(`${basePath}?search=${encodeURIComponent(searchQuery.trim())}`);
+            } else {
+                router.push(basePath);
+            }
+        }
+    }
 
     React.useEffect(() => {
         const fetchNotifs = async () => {
@@ -94,7 +124,10 @@ export const Header = ({
                     <Search className="w-4 h-4 absolute left-3 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                     <input
                         type="text"
-                        placeholder="Search properties, leads..."
+                        placeholder="Search IDs, names, emails..."
+                        value={searchQuery}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        onKeyDown={handleSearch}
                         className="pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 w-64 transition-all"
                     />
                 </div>
@@ -170,19 +203,78 @@ export const Header = ({
                 </div>
 
                 {/* User Profile */}
-                <div className="flex items-center gap-3 pl-6 border-l border-slate-100 cursor-pointer group">
-                    <div className="text-right hidden sm:block">
-                        <p className="text-sm font-semibold text-slate-800">{user?.email || 'Loading...'}</p>
-                        <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">{user?.role || 'User'}</p>
+                <div className="relative">
+                    <div
+                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                        className="flex items-center gap-3 pl-6 border-l border-slate-100 cursor-pointer group"
+                    >
+                        <div className="text-right hidden sm:block">
+                            <p className="text-sm font-semibold text-slate-800">{user?.name || user?.email || 'Loading...'}</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">{user?.role || 'User'}</p>
+                        </div>
+                        <div className="w-10 h-10 bg-slate-100 rounded-full border-2 border-white shadow-sm overflow-hidden transition-transform group-hover:scale-105">
+                            <img
+                                src={user?.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'Felix'}`}
+                                alt="Avatar"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform", isProfileOpen && "rotate-180")} />
                     </div>
-                    <div className="w-10 h-10 bg-slate-100 rounded-full border-2 border-white shadow-sm overflow-hidden transition-transform group-hover:scale-105">
-                        <img
-                            src={user?.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'Felix'}`}
-                            alt="Avatar"
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+
+                    <AnimatePresence>
+                        {isProfileOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 overflow-hidden"
+                            >
+                                <div className="px-4 py-3 border-b border-slate-50">
+                                    <p className="text-xs font-bold text-slate-400 mb-1 uppercase tracking-widest">Account</p>
+                                    <p className="text-sm font-bold text-slate-800 truncate">{user?.name || user?.email}</p>
+                                </div>
+                                <div className="p-2 space-y-1">
+                                    <button
+                                        onClick={() => {
+                                            const role = user?.role || 'user';
+                                            let profilePath = '/dashboard/user/profile';
+                                            if (role === 'admin') profilePath = '/dashboard/admin/profile';
+                                            else if (role === 'agent') profilePath = '/dashboard/agents/profile';
+                                            router.push(profilePath);
+                                            setIsProfileOpen(false);
+                                        }}
+                                        className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all"
+                                    >
+                                        <User className="w-4 h-4" />
+                                        My Profile
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const role = user?.role || 'user';
+                                            let settingsPath = '/dashboard/user/settings';
+                                            if (role === 'admin') settingsPath = '/dashboard/admin/settings';
+                                            router.push(settingsPath);
+                                            setIsProfileOpen(false);
+                                        }}
+                                        className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-purple-600 rounded-xl transition-all"
+                                    >
+                                        <Shield className="w-4 h-4" />
+                                        Security Settings
+                                    </button>
+                                </div>
+                                <div className="p-2 mt-1 border-t border-slate-50">
+                                    <button
+                                        onClick={() => signOut({ callbackUrl: '/login' })}
+                                        className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                    >
+                                        <Mail className="w-4 h-4" />
+                                        Sign Out
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </header>

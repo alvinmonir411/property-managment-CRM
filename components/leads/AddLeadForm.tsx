@@ -23,6 +23,7 @@ export const AddLeadForm = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [formData, setFormData] = useState({
         fullName: '',
+        propertyId: '', // Added propertyId
         email: '',
         phone: '',
         propertyType: 'Apartment',
@@ -64,6 +65,7 @@ export const AddLeadForm = () => {
                 // Reset form
                 setFormData({
                     fullName: '',
+                    propertyId: '',
                     email: '',
                     phone: '',
                     propertyType: 'Apartment',
@@ -118,6 +120,21 @@ export const AddLeadForm = () => {
                                     value={formData.fullName}
                                     onChange={handleChange}
                                     placeholder="e.g. John Doe"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-700">Property ID (Optional)</label>
+                            <div className="relative">
+                                <Home className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                                <input
+                                    type="text"
+                                    name="propertyId"
+                                    value={formData.propertyId}
+                                    onChange={handleChange}
+                                    placeholder="e.g. PROP-123"
                                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 transition-all"
                                 />
                             </div>

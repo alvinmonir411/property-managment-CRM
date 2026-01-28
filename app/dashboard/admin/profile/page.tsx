@@ -1,8 +1,8 @@
 import React from 'react'
 import { ProfileView } from '@/components/dashboard/ProfileView'
 
-const UserProfilePage = () => {
+const AdminProfilePage = () => {
     return <ProfileView />
 }
 
-export default UserProfilePage
+export default AdminProfilePage

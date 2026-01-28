@@ -14,6 +14,7 @@ import {
   MapPin,
   Phone,
   Mail,
+  Home,
 
   /* imports fixed */
   User,
@@ -25,9 +26,12 @@ import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useLeadActions } from "@/hooks/useLeadActions";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 interface Lead {
   _id: string;
+  propertyId?: string;
   fullName: string;
   email: string;
   phone: string;
@@ -50,13 +54,17 @@ interface Lead {
   updatedAt: string;
 }
 
-export const LeadsListView = () => {
+const LeadsListContent = () => {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams.get("search") || "";
+
   const [leads, setLeads] = useState<Lead[]>([]);
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [statusFilter, setStatusFilter] = useState("All");
+  const [purposeFilter, setPurposeFilter] = useState("All");
   const [sortBy, setSortBy] = useState<"createdAt" | "score" | "budgetMax">(
     "createdAt",
   );
@@ -72,9 +80,14 @@ export const LeadsListView = () => {
     fetchLeads();
   }, []);
 
+  // Update searchQuery if URL changes
+  useEffect(() => {
+    setSearchQuery(urlSearch);
+  }, [urlSearch]);
+
   useEffect(() => {
     filterAndSortLeads();
-  }, [leads, searchQuery, sortBy, sortOrder]);
+  }, [leads, searchQuery, sortBy, sortOrder, statusFilter, purposeFilter]);
 
   const fetchLeads = async () => {
     try {
@@ -97,8 +110,10 @@ export const LeadsListView = () => {
         (lead.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           lead.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
           lead.phone.includes(searchQuery) ||
+          lead.propertyId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           lead.location.toLowerCase().includes(searchQuery.toLowerCase())) &&
-        (statusFilter === "All" || lead.status === statusFilter)
+        (statusFilter === "All" || lead.status === statusFilter) &&
+        (purposeFilter === "All" || lead.purpose === purposeFilter)
     );
 
     filtered.sort((a, b) => {
@@ -190,7 +205,7 @@ export const LeadsListView = () => {
             </div>
             <div className="flex items-center gap-4">
               <Link
-                href="/dashboard/agents/addleads"
+                href="/dashboard/admin/addleads"
                 className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl transition-all font-medium flex items-center gap-2 backdrop-blur-md border border-white/20"
               >
                 <Plus className="w-5 h-5" />
@@ -233,44 +248,7 @@ export const LeadsListView = () => {
                 />
               </div>
               <div className="flex gap-3">
-                <div className="relative">
-                  <input
-                    type="file"
-                    id="bulk-import"
-                    className="hidden"
-                    accept=".json"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = async (evt) => {
-                        try {
-                          const items = JSON.parse(evt.target?.result as string);
-                          const res = await fetch("/api/admin/bulk-import", {
-                            method: "POST",
-                            body: JSON.stringify({ type: 'leads', items })
-                          });
-                          const data = await res.json();
-                          if (data.success) {
-                            toast.success(data.message);
-                            window.location.reload();
-                          } else {
-                            toast.error(data.message);
-                          }
-                        } catch (err) {
-                          toast.error("Invalid JSON format");
-                        }
-                      };
-                      reader.readAsText(file);
-                    }}
-                  />
-                  <label
-                    htmlFor="bulk-import"
-                    className="px-5 py-3.5 bg-slate-900 text-white rounded-2xl text-sm font-bold shadow-lg cursor-pointer hover:bg-purple-600 transition-all flex items-center gap-2"
-                  >
-                    🚀 Bulk Import
-                  </label>
-                </div>
+
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -279,6 +257,17 @@ export const LeadsListView = () => {
                   <option value="All">All Statuses</option>
                   {["Assigned", "Call", "Visit", "Deal", "Commission"].map(s => (
                     <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={purposeFilter}
+                  onChange={(e) => setPurposeFilter(e.target.value)}
+                  className="px-5 py-3.5 bg-white/95 backdrop-blur-sm border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-white/50 shadow-lg cursor-pointer"
+                >
+                  <option value="All">All Purposes</option>
+                  {["Buy", "Rent", "Invest"].map(p => (
+                    <option key={p} value={p}>{p}</option>
                   ))}
                 </select>
                 <select
@@ -389,6 +378,19 @@ export const LeadsListView = () => {
                       </p>
                     </div>
                   </div>
+                  {lead.propertyId && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                        <Home className="w-5 h-5 text-indigo-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-slate-500">Property ID</p>
+                        <p className="font-semibold text-slate-800">
+                          {lead.propertyId}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
                       <MapPin className="w-5 h-5 text-purple-600" />
@@ -414,19 +416,21 @@ export const LeadsListView = () => {
 
                   <button
                     onClick={() => setSelectedLead(lead)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
+                    className="flex-1 flex items-center hover:cursor-pointer justify-center gap-2 px-4 py-2.5 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
                   >
                     <Eye className="w-4 h-4" />
                     <span>View Details</span>
                   </button>
 
-                  <button
-                    onClick={() => executeAction(lead._id, "Note", { note: "Quick nudge" })} // Placeholder for now, ideally opens modal
-                    title="Add Quick Note"
-                    className="p-2.5 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 transition-all border border-purple-200"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
+                  {isAdmin && (
+                    <Link
+                      href={`/dashboard/admin/leads/edit/${lead._id}`}
+                      title="Edit Lead"
+                      className="p-2.5 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-all border border-amber-200"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Link>
+                  )}
 
                   {isAdmin && (
                     <button
@@ -526,6 +530,14 @@ export const LeadsListView = () => {
                       </p>
                       <p className="font-semibold text-slate-800">
                         {selectedLead.propertyType}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1 uppercase tracking-wide font-medium">
+                        Property ID
+                      </p>
+                      <p className="font-semibold text-slate-800">
+                        {selectedLead.propertyId || "N/A"}
                       </p>
                     </div>
                     <div>
@@ -664,5 +676,13 @@ export const LeadsListView = () => {
         )}
       </div>
     </div>
+  );
+};
+
+export const LeadsListView = () => {
+  return (
+    <Suspense fallback={<div>Loading leads...</div>}>
+      <LeadsListContent />
+    </Suspense>
   );
 };
