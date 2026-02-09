@@ -4,6 +4,8 @@ EliteProp is a high-performance, production-grade SaaS solution designed for Rea
 
 ---
 
+
+
 ## 🚀 Cutting-Edge Tech Stack
 
 EliteProp is built using the latest stable and experimental versions of top-tier technologies to ensure maximum performance and developer experience:
@@ -19,7 +21,7 @@ EliteProp is built using the latest stable and experimental versions of top-tier
 ---
 #liveLink : https://propertymanagment-five.vercel.app/auth/login
 
-agent@gmail.com,admin@gmail.com  pass is: 13663
+Agent: agent@gmail.com | Admin: admin@gmail.com | Password: 13663
 
 
 ## 🌟 Professional Features by Role
